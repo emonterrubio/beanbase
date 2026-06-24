@@ -67,6 +67,10 @@ coverage/
 htmlcov/
 .coverage
 
+# Pipeline runtime data outputs (samples/ is tracked; runtime dumps are not)
+pipeline/data/*.csv
+pipeline/data/*.json
+
 # Misc
 *.pem
 .vercel
