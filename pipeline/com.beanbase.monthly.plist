@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.beanbase.monthly</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/bin/python3</string>
+        <string>/Users/edmonterrubio/Python/beanBase/pipeline/src/run_monthly.py</string>
+    </array>
+
+    <!-- Fire on the 1st of every month at 07:00 local time -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Day</key>
+        <integer>1</integer>
+        <key>Hour</key>
+        <integer>7</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>/Users/edmonterrubio/Python/beanBase/pipeline/logs/monthly.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/edmonterrubio/Python/beanBase/pipeline/logs/monthly.log</string>
+
+    <!-- Restart if it crashes; don't hammer on repeated failures -->
+    <key>ThrottleInterval</key>
+    <integer>3600</integer>
+
+    <key>RunAtLoad</key>
+    <false/>
+</dict>
+</plist>

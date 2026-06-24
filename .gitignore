@@ -70,6 +70,9 @@ htmlcov/
 # Pipeline runtime data outputs (samples/ is tracked; runtime dumps are not)
 pipeline/data/*.csv
 pipeline/data/*.json
+pipeline/data/snapshots/
+pipeline/data/history/
+pipeline/logs/
 
 # Misc
 *.pem
