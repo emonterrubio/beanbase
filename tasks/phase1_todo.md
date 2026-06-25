@@ -51,14 +51,17 @@ Validation gate: **500 free signups** before starting Phase 2.
 - [x] Bug fix: coe_loader score normalization — pages encoding 90.65 as 9065 now handled
 - [x] Bug fix: run_monthly.py --dry-run now threads dry_run flag into CoE scraper (no stale archive writes)
 
-### Sprint 4: FastAPI Data Layer
-- [ ] api/app/db/session.py — async SQLAlchemy engine + get_db dependency
-- [ ] api/app/schemas/ — Pydantic v2 response models: FarmSummary, FarmDetail, LotRow, OriginCard
-- [ ] api/app/schemas/ — filter models: FarmFilter, LotFilter
-- [ ] api/app/routers/farms.py — GET /farms (search, paginated), GET /farms/{slug}
-- [ ] api/app/routers/lots.py — GET /lots (filter by origin/year/score/process/price), GET /lots/{id}
-- [ ] api/app/routers/origins.py — GET /origins, GET /origins/{country}
-- [ ] Register all routers in api/app/main.py
+### Sprint 4: FastAPI Data Layer ✓
+- [x] api/app/db/session.py — async SQLAlchemy engine (asyncpg) + get_db dependency; strips sslmode/channel_binding for asyncpg compat
+- [x] api/app/schemas/ — Pydantic v2 response models: FarmSummary, FarmDetail, LotRow, LotDetail, OriginCard, Page[T]
+- [x] api/app/routers/farms.py — GET /farms (q/origin/process/source filters, paginated), GET /farms/{slug}
+- [x] api/app/routers/lots.py — GET /lots (origin/year/score/price/process/farm_id filters, paginated), GET /lots/{id}
+- [x] api/app/routers/origins.py — GET /origins, GET /origins/{country}
+- [x] Register all routers in api/app/main.py
+- [x] Bug fix: greenlet added to requirements (asyncpg async runtime dependency)
+- [x] Bug fix: all ORM models imported in models/__init__.py to resolve mapper relationships at startup
+- [x] Bug fix: ALLOWED_ORIGINS stored as str to avoid pydantic-settings JSON-decode on List[str] fields
+- [x] Verified against Neon: /origins 30 rows, /lots?origin=Ethiopia&min_score=90 → 19 lots, /farms?origin=Colombia → 470 farms
 
 ### Sprint 5: Next.js Frontend
 - [ ] web/src/styles/tokens.css — BeanBase CSS vars (--bean-brown, --dark-roast, --honey-gold, etc.)
