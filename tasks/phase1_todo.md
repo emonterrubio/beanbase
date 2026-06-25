@@ -36,6 +36,21 @@ Validation gate: **500 free signups** before starting Phase 2.
 - [x] run_monthly.py wired: Phase 1 scrape → Phase 2 DB load (skipped if no DATABASE_URL)
 - [x] Verified: 329 farms, 95 lots, 178 importer_products loaded from sample data
 
+### Sprint 3.5: Cloud Infrastructure ✓
+- [x] Neon PostgreSQL — project "beanbase" (us-east-1), direct + pooler connection strings
+- [x] Alembic migrations 0001 + 0002 applied to Neon
+- [x] 30 canonical origin rows seeded into Neon (db/seeds/seed_origins.py)
+- [x] Railway service deployed from api/ subdirectory; /health endpoint live; auto-deploys on push to main
+- [x] api/Procfile — uvicorn start command
+- [x] api/.python-version — pinned to 3.11 for Railway/nixpacks
+- [x] railway.toml — healthcheck path /health, restart policy on_failure (3 retries)
+- [x] api/app/config.py — ALLOWED_ORIGINS parses comma-separated env var (needed for Vercel URL in prod)
+- [x] pipeline/load_archives_to_neon.py — one-shot loader for backfilling 211 archive files → Neon
+- [x] CoE backfill: 6,049 lots → Neon (all 211 archive files)
+- [x] Cafe Imports: 245 farms → Neon; Onyx: 177 products → Neon
+- [x] Bug fix: coe_loader score normalization — pages encoding 90.65 as 9065 now handled
+- [x] Bug fix: run_monthly.py --dry-run now threads dry_run flag into CoE scraper (no stale archive writes)
+
 ### Sprint 4: FastAPI Data Layer
 - [ ] api/app/db/session.py — async SQLAlchemy engine + get_db dependency
 - [ ] api/app/schemas/ — Pydantic v2 response models: FarmSummary, FarmDetail, LotRow, OriginCard
