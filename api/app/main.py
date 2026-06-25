@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 import pathlib
@@ -13,11 +12,10 @@ app = FastAPI(
     title="BeanBase API",
     description="The Global Intelligence Layer for Specialty Coffee",
     version="0.1.0",
-    docs_url=None,    # disable default; we serve custom below
+    docs_url=None,
     redoc_url=None,
 )
 
-# Serve static assets (custom Swagger CSS, future favicon, etc.)
 _static_dir = pathlib.Path(__file__).parent.parent / "static"
 app.mount("/static", StaticFiles(directory=_static_dir), name="static")
 
@@ -40,14 +38,31 @@ async def health():
 
 
 @app.get("/docs", include_in_schema=False)
-async def custom_docs() -> HTMLResponse:
-    return get_swagger_ui_html(
-        openapi_url="/openapi.json",
-        title="BeanBase API",
-        swagger_css_url="/static/swagger-custom.css",
-        swagger_ui_parameters={
-            "defaultModelsExpandDepth": -1,   # collapse schemas section by default
-            "syntaxHighlight.theme": "monokai",
-            "tryItOutEnabled": True,
-        },
-    )
+async def scalar_docs() -> HTMLResponse:
+    return HTMLResponse("""<!DOCTYPE html>
+<html>
+<head>
+  <title>BeanBase API</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body>
+  <script
+    id="api-reference"
+    data-url="/openapi.json"
+    data-configuration='{
+      "theme": "kepler",
+      "darkMode": true,
+      "metaData": {
+        "title": "BeanBase API"
+      },
+      "hiddenClients": [],
+      "defaultHttpClient": {
+        "targetKey": "python",
+        "clientKey": "requests"
+      }
+    }'
+  ></script>
+  <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+</body>
+</html>""")
