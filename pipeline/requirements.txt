@@ -8,6 +8,8 @@ python-dotenv==1.2.1
 pydantic==2.13.4
 sentry-sdk==2.63.0
 apify-client==1.12.2
+sqlalchemy==2.0.51
+psycopg2-binary==2.9.12
 
 # Scheduling (optional)
 # apache-airflow==2.10.x  # Add when scheduling needed

@@ -26,12 +26,15 @@ Validation gate: **500 free signups** before starting Phase 2.
 - [x] Registered in run_monthly.py SCRAPERS list
 - [ ] Known gap: some old pages (e.g. Ethiopia 2020) have non-standard table layouts — fix in later sprint
 
-### Sprint 3: Normalizers & DB Loaders
-- [ ] pipeline/src/normalizers/process_method.py — shared process taxonomy
-- [ ] pipeline/src/loaders/coe_loader.py — upsert CoE lots → origins, farms, auction_events, lots
-- [ ] pipeline/src/loaders/cafe_imports_loader.py — upsert importer inventory → farms (with importer_ids JSONB)
-- [ ] pipeline/src/loaders/onyx_loader.py — importer_products table
-- [ ] Wire loaders into run_monthly.py after scraping loop
+### Sprint 3: Normalizers & DB Loaders ✓
+- [x] api/alembic/versions/0002 — lot_rank column, uq constraints, importer_products table
+- [x] pipeline/src/normalizers/process_method.py — 30-entry canonical taxonomy
+- [x] pipeline/src/normalizers/__init__.py — shared slugify()
+- [x] pipeline/src/loaders/coe_loader.py — upserts CoE lots → farms + auction_events + lots
+- [x] pipeline/src/loaders/cafe_imports_loader.py — upserts producers → farms with importer_ids JSONB
+- [x] pipeline/src/loaders/onyx_loader.py — upserts products → importer_products
+- [x] run_monthly.py wired: Phase 1 scrape → Phase 2 DB load (skipped if no DATABASE_URL)
+- [x] Verified: 329 farms, 95 lots, 178 importer_products loaded from sample data
 
 ### Sprint 4: FastAPI Data Layer
 - [ ] api/app/db/session.py — async SQLAlchemy engine + get_db dependency

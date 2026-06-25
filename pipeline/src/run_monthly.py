@@ -11,10 +11,13 @@ Usage:
 import argparse
 import csv
 import logging
+import os
 import sys
 from collections import Counter
 from datetime import date
 from pathlib import Path
+
+from dotenv import load_dotenv
 
 # ---------------------------------------------------------------------------
 # Paths (all relative to pipeline/)
@@ -25,8 +28,13 @@ SNAP_DIR     = DATA_DIR / "snapshots"
 HIST_DIR     = DATA_DIR / "history"
 LOG_DIR      = PIPELINE_DIR / "logs"
 
-# Add src/ to path so scrapers are importable when called directly
+# Add src/ to path so scrapers and loaders are importable when called directly
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+# Load pipeline .env (DATABASE_URL for loaders), then fall back to api/.env
+_PIPELINE_ENV = Path(__file__).resolve().parents[1] / ".env"
+_API_ENV      = Path(__file__).resolve().parents[2] / "api" / ".env"
+load_dotenv(_PIPELINE_ENV if _PIPELINE_ENV.exists() else _API_ENV)
 
 from scrapers import cafe_imports, coe_scraper, onyx  # noqa: E402
 
@@ -123,12 +131,39 @@ def _summarize(key: str, rows: list[dict]) -> None:
 # Main
 # ---------------------------------------------------------------------------
 
+def _run_loaders(scraped: dict, month_stamp: str) -> None:
+    """Phase 2: write scraped rows to PostgreSQL. Skipped if DATABASE_URL not set."""
+    db_url = os.environ.get("DATABASE_URL")
+    if not db_url:
+        log.info("DATABASE_URL not set — skipping DB loaders")
+        return
+
+    from loaders import cafe_imports_loader, coe_loader, onyx_loader
+
+    LOADERS = [
+        ("coe",          coe_loader,          scraped.get("coe", [])),
+        ("cafe_imports", cafe_imports_loader,  scraped.get("cafe_imports", [])),
+        ("onyx",         onyx_loader,          scraped.get("onyx", [])),
+    ]
+
+    log.info("--- DB loaders ---")
+    for key, loader, rows in LOADERS:
+        if not rows:
+            log.info("%s loader: 0 rows — skipping", key)
+            continue
+        try:
+            result = loader.load(rows)
+            log.info("%s loader: %s", key, result)
+        except Exception as exc:
+            log.error("%s loader failed: %s", key, exc)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="beanBase monthly pipeline")
     parser.add_argument("--month", default=date.today().strftime("%Y-%m"),
                         help="Month to scrape, format YYYY-MM (default: current month)")
     parser.add_argument("--dry-run", action="store_true",
-                        help="Fetch and parse but do not write any files")
+                        help="Fetch and parse but do not write any files or load DB")
     args = parser.parse_args()
 
     month_stamp = args.month
@@ -136,7 +171,9 @@ def main() -> None:
              month_stamp, "  [DRY RUN]" if args.dry_run else "")
 
     failed: list[str] = []
+    scraped: dict = {}
 
+    # Phase 1: scrape
     for key, module, fields in SCRAPERS:
         log.info("--- %s ---", key)
         try:
@@ -146,6 +183,7 @@ def main() -> None:
             failed.append(key)
             continue
 
+        scraped[key] = rows
         _summarize(key, rows)
 
         if args.dry_run:
@@ -164,6 +202,10 @@ def main() -> None:
             action = "appended" if existed else "created"
             log.info("%s: history %s → %s  (+%d rows)",
                      key, action, hist_path.relative_to(PIPELINE_DIR), written)
+
+    # Phase 2: load into DB
+    if not args.dry_run:
+        _run_loaders(scraped, month_stamp)
 
     if failed:
         log.error("Pipeline finished with errors: %s", failed)

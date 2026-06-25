@@ -16,6 +16,7 @@ class Lot(Base):
     auction_event_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("auction_events.id"), index=True)
     farm_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("farms.id"), index=True)
     lot_number: Mapped[Optional[int]] = mapped_column(Integer)
+    lot_rank: Mapped[Optional[str]] = mapped_column(String(20), index=True)
     score: Mapped[Optional[float]] = mapped_column(Numeric(4, 2), index=True)
     process_method: Mapped[Optional[str]] = mapped_column(String(100), index=True)
     varietal: Mapped[Optional[List[str]]] = mapped_column(ARRAY(Text))
