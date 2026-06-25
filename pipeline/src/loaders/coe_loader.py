@@ -151,12 +151,20 @@ def _upsert_lot(conn, event_id: int, farm_id: Optional[int], row: dict) -> str:
     varietal_raw = str(row.get("Varietal", "") or "").strip()
     varietal_arr = [varietal_raw] if varietal_raw else None
 
+    score_raw = row.get("ScoreCoE")
+    if score_raw is not None:
+        score = float(score_raw)
+        if score > 100:
+            score = round(score / 100, 2)
+    else:
+        score = None
+
     params = {
         "event_id": event_id,
         "farm_id": farm_id,
         "lot_rank": lot_rank,
         "lot_number": _lot_number(lot_rank),
-        "score": row.get("ScoreCoE") or None,
+        "score": score,
         "process": norm_process(str(row.get("Process", "") or "")),
         "varietal": varietal_arr,
         "weight_kg": row.get("WeightKg") or None,
