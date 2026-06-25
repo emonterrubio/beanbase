@@ -10,6 +10,7 @@ Usage:
 
 import argparse
 import csv
+import inspect
 import logging
 import os
 import sys
@@ -177,7 +178,9 @@ def main() -> None:
     for key, module, fields in SCRAPERS:
         log.info("--- %s ---", key)
         try:
-            rows = module.run(month_stamp)
+            sig = inspect.signature(module.run)
+            kwargs = {"dry_run": args.dry_run} if "dry_run" in sig.parameters else {}
+            rows = module.run(month_stamp, **kwargs)
         except Exception as exc:
             log.error("%s: scrape failed — %s", key, exc)
             failed.append(key)
