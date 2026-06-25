@@ -28,7 +28,7 @@ LOG_DIR      = PIPELINE_DIR / "logs"
 # Add src/ to path so scrapers are importable when called directly
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from scrapers import cafe_imports, onyx  # noqa: E402
+from scrapers import cafe_imports, coe_scraper, onyx  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Scraper registry
@@ -37,6 +37,7 @@ from scrapers import cafe_imports, onyx  # noqa: E402
 SCRAPERS = [
     ("cafe_imports", cafe_imports, cafe_imports.FIELDS),
     ("onyx",         onyx,         onyx.FIELDS),
+    ("coe",          coe_scraper,  coe_scraper.FIELDS),
 ]
 
 logging.basicConfig(
@@ -98,20 +99,24 @@ def _summarize(key: str, rows: list[dict]) -> None:
         log.warning("%s: 0 rows — check scraper", key)
         return
 
-    status_field  = "Status"    if key == "cafe_imports" else "Available"
-    process_field = "Process"
-
     log.info("%s: %d rows", key, len(rows))
 
     if key == "cafe_imports":
-        status_counts = Counter(r.get(status_field, "") for r in rows)
+        status_counts = Counter(r.get("Status", "") for r in rows)
         log.info("  Status  → %s", dict(status_counts.most_common()))
-    else:
+    elif key == "onyx":
         avail = sum(1 for r in rows if r.get("Available") == "true")
         log.info("  Available → %d/%d", avail, len(rows))
+    elif key == "coe":
+        country_counts = Counter(r.get("Country", "") for r in rows)
+        log.info("  Countries → %s", dict(country_counts.most_common(10)))
+        lot_type_counts = Counter(r.get("LotType", "") for r in rows)
+        log.info("  LotType   → %s", dict(lot_type_counts.most_common()))
 
+    process_field = "Process" if key != "onyx" else "Process"
     process_counts = Counter(r.get(process_field, "") for r in rows if r.get(process_field))
-    log.info("  Process → %s", dict(process_counts.most_common(6)))
+    if process_counts:
+        log.info("  Process → %s", dict(process_counts.most_common(6)))
 
 
 # ---------------------------------------------------------------------------
