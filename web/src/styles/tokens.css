@@ -1,0 +1,63 @@
+@theme {
+  /* Bean Brown — primary brand palette, warm roasted brown */
+  --color-bean-brown-950: #0d0600;
+  --color-bean-brown-900: #1a0d00;
+  --color-bean-brown-800: #2c1810;
+  --color-bean-brown-700: #3d2415;
+  --color-bean-brown-600: #5c3520;
+  --color-bean-brown-500: #7a4a2d;
+  --color-bean-brown-400: #9b6040;
+  --color-bean-brown-300: #bb8060;
+  --color-bean-brown-200: #d4a882;
+  --color-bean-brown-100: #ead4bc;
+  --color-bean-brown-50:  #f5ede0;
+
+  /* Honey Gold — accent, used for scores, highlights, CTAs */
+  --color-honey-700: #8a5c00;
+  --color-honey-600: #b07800;
+  --color-honey-500: #d4940a;
+  --color-honey-400: #e8aa20;
+  --color-honey-300: #f0c040;
+  --color-honey-200: #f5d580;
+  --color-honey-100: #faeab8;
+  --color-honey-50:  #fdf6e0;
+
+  /* Cream — warm page backgrounds */
+  --color-cream-200: #ead4bc;
+  --color-cream-100: #f5ede0;
+  --color-cream-50:  #faf7f2;
+
+  /* Fog — warm neutral grays for text, borders, surfaces */
+  --color-fog-900: #1c1917;
+  --color-fog-800: #292524;
+  --color-fog-700: #44403c;
+  --color-fog-600: #57534e;
+  --color-fog-500: #78716c;
+  --color-fog-400: #a8a29e;
+  --color-fog-300: #d6d3d1;
+  --color-fog-200: #e7e5e4;
+  --color-fog-100: #f5f5f4;
+  --color-fog-50:  #fafaf9;
+
+  /* Score tier colors */
+  --color-score-exceptional: #15803d;
+  --color-score-outstanding: #0369a1;
+  --color-score-excellent:   #6d28d9;
+
+  /* Semantic aliases wired into Tailwind utilities */
+  --color-background: var(--color-cream-50);
+  --color-surface:    var(--color-cream-100);
+  --color-border:     var(--color-fog-200);
+  --color-text:       var(--color-fog-900);
+  --color-muted:      var(--color-fog-500);
+  --color-brand:      var(--color-bean-brown-800);
+  --color-accent:     var(--color-honey-500);
+
+  /* Border radius */
+  --radius-card:  0.75rem;
+  --radius-badge: 9999px;
+
+  /* Font stacks — Geist is loaded in layout.tsx */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
