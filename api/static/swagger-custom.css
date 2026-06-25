@@ -1,0 +1,230 @@
+/* ── BeanBase API Docs — custom Swagger UI theme ── */
+
+/* Base */
+body {
+  background: #faf7f2;
+  font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+/* Hide the default ugly topbar */
+.swagger-ui .topbar { display: none; }
+
+/* Info block */
+.swagger-ui .info {
+  margin: 40px 0 32px;
+}
+.swagger-ui .info .title {
+  color: #2c1810;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.swagger-ui .info .title small {
+  background: #d4940a;
+  border-radius: 9999px;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 2px 10px;
+  vertical-align: middle;
+}
+.swagger-ui .info p,
+.swagger-ui .info li,
+.swagger-ui .info a {
+  color: #57534e;
+}
+.swagger-ui .info a { color: #d4940a; }
+
+/* Scheme container (server selector) */
+.swagger-ui .scheme-container {
+  background: #fff;
+  border: 1px solid #e7e5e4;
+  border-radius: 12px;
+  box-shadow: none;
+  padding: 16px 20px;
+}
+
+/* Section tag headers */
+.swagger-ui .opblock-tag {
+  border-bottom: 1px solid #e7e5e4;
+  color: #2c1810;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.swagger-ui .opblock-tag:hover {
+  background: #f5ede0;
+}
+
+/* Endpoint blocks */
+.swagger-ui .opblock {
+  border-radius: 10px;
+  box-shadow: none;
+  margin-bottom: 6px;
+  border: 1px solid transparent;
+}
+
+/* GET */
+.swagger-ui .opblock.opblock-get {
+  background: #f0f7ff;
+  border-color: #bfdbfe;
+}
+.swagger-ui .opblock.opblock-get .opblock-summary-method {
+  background: #2563eb;
+  border-radius: 6px;
+}
+
+/* POST */
+.swagger-ui .opblock.opblock-post {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+.swagger-ui .opblock.opblock-post .opblock-summary-method {
+  background: #16a34a;
+  border-radius: 6px;
+}
+
+/* DELETE */
+.swagger-ui .opblock.opblock-delete {
+  background: #fff1f2;
+  border-color: #fecdd3;
+}
+.swagger-ui .opblock.opblock-delete .opblock-summary-method {
+  background: #dc2626;
+  border-radius: 6px;
+}
+
+/* PATCH / PUT */
+.swagger-ui .opblock.opblock-patch,
+.swagger-ui .opblock.opblock-put {
+  background: #fffbeb;
+  border-color: #fde68a;
+}
+.swagger-ui .opblock.opblock-patch .opblock-summary-method,
+.swagger-ui .opblock.opblock-put .opblock-summary-method {
+  background: #d97706;
+  border-radius: 6px;
+}
+
+/* Method badges text */
+.swagger-ui .opblock-summary-method {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  min-width: 60px;
+}
+
+/* Summary path */
+.swagger-ui .opblock-summary-path,
+.swagger-ui .opblock-summary-path__deprecated {
+  color: #1c1917;
+  font-family: ui-monospace, monospace;
+  font-size: 0.85rem;
+}
+
+/* Expanded block body */
+.swagger-ui .opblock .opblock-body {
+  background: #fff;
+  border-top: 1px solid #e7e5e4;
+}
+
+/* Execute button */
+.swagger-ui .btn.execute {
+  background: #d4940a;
+  border-color: #d4940a;
+  border-radius: 9999px;
+  color: #fff;
+  font-weight: 600;
+}
+.swagger-ui .btn.execute:hover {
+  background: #b07800;
+  border-color: #b07800;
+}
+
+/* Cancel button */
+.swagger-ui .btn-clear {
+  border-radius: 9999px;
+  color: #57534e;
+}
+
+/* Authorize button */
+.swagger-ui .btn.authorize {
+  border-color: #d4940a;
+  border-radius: 9999px;
+  color: #d4940a;
+}
+.swagger-ui .btn.authorize svg { fill: #d4940a; }
+
+/* Parameters table */
+.swagger-ui table.parameters th {
+  color: #78716c;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.swagger-ui .parameter__name {
+  color: #2c1810;
+  font-family: ui-monospace, monospace;
+  font-size: 0.82rem;
+}
+.swagger-ui .parameter__type {
+  color: #78716c;
+  font-family: ui-monospace, monospace;
+  font-size: 0.75rem;
+}
+
+/* Response codes */
+.swagger-ui .responses-table .response-col_status {
+  color: #2c1810;
+  font-family: ui-monospace, monospace;
+  font-weight: 600;
+}
+
+/* Models / schemas section */
+.swagger-ui section.models {
+  border: 1px solid #e7e5e4;
+  border-radius: 12px;
+}
+.swagger-ui section.models h4 {
+  color: #2c1810;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.swagger-ui .model-title {
+  color: #2c1810;
+  font-weight: 600;
+}
+.swagger-ui .model {
+  color: #44403c;
+  font-family: ui-monospace, monospace;
+  font-size: 0.8rem;
+}
+
+/* Inputs */
+.swagger-ui input[type=text],
+.swagger-ui textarea,
+.swagger-ui select {
+  border: 1px solid #d6d3d1;
+  border-radius: 8px;
+  color: #1c1917;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+.swagger-ui input[type=text]:focus,
+.swagger-ui textarea:focus {
+  border-color: #d4940a;
+  outline: 2px solid #faeab8;
+}
+
+/* Response body */
+.swagger-ui .highlight-code {
+  background: #1c1917;
+  border-radius: 8px;
+}
+
+/* Wrapper max-width */
+.swagger-ui .wrapper {
+  max-width: 960px;
+  padding: 0 24px;
+}
