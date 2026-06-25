@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from app.config import settings
+import app.models  # noqa: F401 — registers all ORM models before first request
+from app.routers import farms, lots, origins
 
 app = FastAPI(
     title="BeanBase API",
@@ -12,23 +15,17 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.allowed_origins,
+    allow_origins=settings.allowed_origins_list,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+app.include_router(origins.router, prefix="/origins", tags=["origins"])
+app.include_router(farms.router, prefix="/farms", tags=["farms"])
+app.include_router(lots.router, prefix="/lots", tags=["lots"])
+
 
 @app.get("/health")
 async def health():
     return {"status": "ok", "version": "0.1.0"}
-
-
-# Routers registered in Phase 1–3
-# from app.routers import farms, lots, origins, certifications, prices, producers
-# app.include_router(farms.router, prefix="/farms", tags=["farms"])
-# app.include_router(lots.router, prefix="/lots", tags=["lots"])
-# app.include_router(origins.router, prefix="/origins", tags=["origins"])
-# app.include_router(certifications.router, prefix="/certifications", tags=["certifications"])
-# app.include_router(prices.router, prefix="/prices", tags=["prices"])
-# app.include_router(producers.router, prefix="/producers", tags=["producers"])
