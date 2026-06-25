@@ -39,7 +39,7 @@ LB_TO_KG = 0.453592
 # ---------------------------------------------------------------------------
 
 def _get_engine():
-    return create_engine(DATABASE_URL)
+    return create_engine(DATABASE_URL, connect_args={"connect_timeout": 15})
 
 
 def _origin_id_cache(conn) -> Dict[str, int]:
@@ -143,7 +143,7 @@ def _get_or_create_auction_event(conn, country: str, year: int,
 def _upsert_lot(conn, event_id: int, farm_id: Optional[int], row: dict) -> str:
     """Insert or update a lot. Returns 'inserted' | 'updated' | 'skipped'."""
     lot_rank = str(row.get("LotRank", "") or "").strip()
-    if not lot_rank:
+    if not lot_rank or len(lot_rank) > 20 or "," in lot_rank:
         return "skipped"
 
     price_per_lb = row.get("PriceUSDPerLb")

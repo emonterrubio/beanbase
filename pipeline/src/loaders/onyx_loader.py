@@ -32,7 +32,7 @@ log = logging.getLogger(__name__)
 
 
 def _get_engine():
-    return create_engine(DATABASE_URL)
+    return create_engine(DATABASE_URL, connect_args={"connect_timeout": 15})
 
 
 def _price(raw) -> Optional[float]:
