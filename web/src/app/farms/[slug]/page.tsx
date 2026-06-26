@@ -6,13 +6,30 @@ import { ScoreBadge } from "@/components/ScoreBadge";
 
 type Params = Promise<{ slug: string }>;
 
+export async function generateStaticParams() {
+  try {
+    const pages = await Promise.all(
+      [1, 2, 3, 4, 5].map((page) => api.farms.list({ page, page_size: 100 }))
+    );
+    return pages.flatMap((d) => d.items.map((f) => ({ slug: f.slug })));
+  } catch {
+    return [];
+  }
+}
+
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
   try {
     const farm = await api.farms.get(slug);
-    return { title: farm.canonical_name };
+    const title = `${farm.canonical_name}${farm.country ? ` — ${farm.country}` : ""} | BeanBase`;
+    const description = `${farm.canonical_name} is a specialty coffee farm${farm.country ? ` in ${farm.country}` : ""}. Explore auction history, scores, and lot data on BeanBase.`;
+    return {
+      title,
+      description,
+      openGraph: { title, description, type: "website" },
+    };
   } catch {
-    return { title: "Farm" };
+    return { title: "Farm | BeanBase" };
   }
 }
 

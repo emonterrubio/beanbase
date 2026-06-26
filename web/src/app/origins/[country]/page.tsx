@@ -7,9 +7,27 @@ type Params = Promise<{ country: string }>;
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
+export async function generateStaticParams() {
+  try {
+    const origins = await api.origins.list();
+    return origins
+      .filter((o) => !o.region)
+      .map((o) => ({ country: encodeURIComponent(o.country) }));
+  } catch {
+    return [];
+  }
+}
+
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { country } = await params;
-  return { title: decodeURIComponent(country) };
+  const name = decodeURIComponent(country);
+  const title = `${name} Coffee Origins | BeanBase`;
+  const description = `Explore ${name} specialty coffee — altitude, harvest windows, varietals, and Cup of Excellence auction data on BeanBase.`;
+  return {
+    title,
+    description,
+    openGraph: { title, description, type: "website" },
+  };
 }
 
 export default async function OriginDetailPage({ params }: { params: Params }) {

@@ -18,6 +18,7 @@ from collections import Counter
 from datetime import date
 from pathlib import Path
 
+import sentry_sdk
 from dotenv import load_dotenv
 
 # ---------------------------------------------------------------------------
@@ -36,6 +37,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 _PIPELINE_ENV = Path(__file__).resolve().parents[1] / ".env"
 _API_ENV      = Path(__file__).resolve().parents[2] / "api" / ".env"
 load_dotenv(_PIPELINE_ENV if _PIPELINE_ENV.exists() else _API_ENV)
+
+if os.environ.get("SENTRY_DSN"):
+    sentry_sdk.init(
+        dsn=os.environ["SENTRY_DSN"],
+        traces_sample_rate=0.0,
+        environment=os.environ.get("ENVIRONMENT", "production"),
+    )
 
 from scrapers import cafe_imports, coe_scraper, onyx  # noqa: E402
 
@@ -157,6 +165,7 @@ def _run_loaders(scraped: dict, month_stamp: str) -> None:
             log.info("%s loader: %s", key, result)
         except Exception as exc:
             log.error("%s loader failed: %s", key, exc)
+            sentry_sdk.capture_exception(exc)
 
 
 def main() -> None:
@@ -183,6 +192,7 @@ def main() -> None:
             rows = module.run(month_stamp, **kwargs)
         except Exception as exc:
             log.error("%s: scrape failed — %s", key, exc)
+            sentry_sdk.capture_exception(exc)
             failed.append(key)
             continue
 
