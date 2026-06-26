@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { api } from "@/lib/api";
+import { CountryBanner } from "@/components/CountryBanner";
 import { LotTable } from "@/components/LotTable";
 import { ScoreBadge } from "@/components/ScoreBadge";
 
@@ -51,7 +52,10 @@ export default async function FarmDetailPage({ params }: { params: Params }) {
     .sort((a, b) => b - a)[0] ?? null;
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+    <>
+      <CountryBanner country={farm.country} variant="banner" priority />
+
+      <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
       {/* Header */}
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
@@ -120,6 +124,7 @@ export default async function FarmDetailPage({ params }: { params: Params }) {
       ) : (
         <p className="text-sm text-muted">Could not load auction history.</p>
       )}
-    </div>
+      </div>
+    </>
   );
 }

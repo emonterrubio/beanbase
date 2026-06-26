@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { UserButton } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 
 const LINKS = [
   { href: "/farms",    label: "Farms"    },
@@ -6,7 +8,9 @@ const LINKS = [
   { href: "/origins",  label: "Origins"  },
 ];
 
-export function Nav() {
+export async function Nav() {
+  const { userId } = await auth();
+
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-white/95 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
@@ -28,12 +32,33 @@ export function Nav() {
               {label}
             </Link>
           ))}
-          <Link
-            href="/signup"
-            className="rounded-badge bg-brand px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-bean-brown-700"
-          >
-            Sign up free
-          </Link>
+
+          {userId ? (
+            <>
+              <Link
+                href="/dashboard"
+                className="hidden text-sm font-medium text-muted transition-colors hover:text-text sm:block"
+              >
+                Dashboard
+              </Link>
+              <UserButton />
+            </>
+          ) : (
+            <>
+              <Link
+                href="/sign-in"
+                className="hidden text-sm font-medium text-muted transition-colors hover:text-text sm:block"
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/sign-up"
+                className="rounded-badge bg-brand px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-bean-brown-700"
+              >
+                Sign up free
+              </Link>
+            </>
+          )}
         </nav>
       </div>
     </header>
