@@ -63,21 +63,22 @@ Validation gate: **500 free signups** before starting Phase 2.
 - [x] Bug fix: ALLOWED_ORIGINS stored as str to avoid pydantic-settings JSON-decode on List[str] fields
 - [x] Verified against Neon: /origins 30 rows, /lots?origin=Ethiopia&min_score=90 → 19 lots, /farms?origin=Colombia → 470 farms
 
-### Sprint 5: Next.js Frontend
-- [ ] web/src/styles/tokens.css — BeanBase CSS vars (--bean-brown, --dark-roast, --honey-gold, etc.)
-- [ ] web/tailwind.config.ts — wire design tokens into theme.extend.colors
-- [ ] web/src/lib/api.ts — typed fetch wrapper pointing at NEXT_PUBLIC_API_URL
-- [ ] Layout: Nav.tsx + Footer.tsx
-- [ ] Pages: /farms (Farm Explorer, paginated), /farms/[slug] (Farm detail, SSG)
-- [ ] Pages: /auctions (Auction History Browser), /origins (Origin Cards), /origins/[country]
-- [ ] Pages: /producers/[slug] (longitudinal producer profile)
-- [ ] Components: FarmCard, FarmGrid, LotTable, LotRow, OriginCard, ScoreBadge, CertBadge, SearchBar, FilterChip
+### Sprint 5: Next.js Frontend ✓
+- [x] web/src/styles/tokens.css — Tailwind v4 @theme design tokens (bean-brown, honey, cream, fog palettes + semantic aliases)
+- [x] web/src/lib/api.ts — typed fetch wrapper (FarmSummary, FarmDetail, LotRow, LotDetail, OriginCard, Page<T>) pointing at NEXT_PUBLIC_API_URL
+- [x] Layout: Nav.tsx (sticky header, brand logo, CTA) + Footer.tsx
+- [x] Pages: /farms (Farm Explorer, SearchBar + origin/process FilterChips, paginated), /farms/[slug] (farm detail + lot history)
+- [x] Pages: /auctions (origin/score/year FilterChips + LotTable, paginated), /origins (country grid), /origins/[country] (altitude/harvest/varietals + top lots)
+- [x] Pages: / (home hero, live stats with try/catch fallback, feature cards)
+- [x] Components: FarmCard, FarmGrid, LotTable, OriginCard, ScoreBadge, CertBadge, SearchBar, FilterChip, Pagination
+- [x] API docs: replaced Swagger UI with Scalar (theme: kepler, dark mode, Python default client)
+- [x] Deployed to Vercel — beanbase-theta.vercel.app live (Root Directory=web, web/vercel.json)
 
-### Sprint 6: SEO + Sentry (Required Before Beta)
-- [ ] generateStaticParams on /farms/[slug] and /origins/[country] — static HTML at build time
-- [ ] generateMetadata — dynamic OG tags (farm name + country + score in title)
-- [ ] web/src/app/sitemap.ts — generate sitemap for all static pages
-- [ ] @sentry/nextjs install + wizard in web/
-- [ ] sentry-sdk wired into api/app/main.py (on startup)
-- [ ] ETL pipeline Sentry alerting — wrap each scraper call in try/except → capture_exception (REQUIRED before launch)
-- [ ] Beta launch on Vercel
+### Sprint 6: SEO + Sentry ✓
+- [x] generateStaticParams on /farms/[slug] (500 pages) and /origins/[country] (18 pages) — SSG at build time
+- [x] generateMetadata — OG title + description on farm and origin detail pages
+- [x] web/src/app/sitemap.ts — dynamic sitemap covering static routes + all farm + origin pages
+- [x] @sentry/nextjs wired via src/instrumentation.ts + sentry.{client,server}.config.ts + withSentryConfig in next.config.ts
+- [x] sentry-sdk wired into api/app/main.py (FastApiIntegration + StarletteIntegration, gated on SENTRY_DSN)
+- [x] ETL pipeline Sentry alerting — sentry_sdk.init in run_monthly.py; capture_exception on all scraper + loader failures
+- [x] Beta launch — SENTRY_DSN set in Vercel + Railway; beanbase-theta.vercel.app live and open for signups
