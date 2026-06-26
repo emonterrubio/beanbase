@@ -110,6 +110,88 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Pricing */}
+      <section className="border-t border-border bg-cream-50 px-4 py-20 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-5xl">
+          <div className="mb-12 text-center">
+            <h2 className="text-2xl font-bold text-text">Simple, transparent pricing</h2>
+            <p className="mt-2 text-sm text-muted">Start free. Upgrade when the data pays for itself.</p>
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-3">
+            {/* Free */}
+            <div className="flex flex-col rounded-card border border-border bg-white p-8">
+              <p className="text-sm font-medium text-muted">Free</p>
+              <p className="mt-1 text-4xl font-bold text-text">$0</p>
+              <p className="mt-1 text-xs text-muted">forever</p>
+              <ul className="my-8 flex-1 space-y-3 text-sm text-text">
+                {["Farm Explorer", "25 years of CoE auction history", "Origin intelligence cards", "Unlimited browsing"].map((f) => (
+                  <li key={f} className="flex items-start gap-2">
+                    <span className="mt-0.5 text-honey-500">✓</span>{f}
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href="/sign-up"
+                className="block w-full rounded-badge border border-brand py-2.5 text-center text-sm font-semibold text-brand transition-colors hover:bg-cream-100"
+              >
+                Get started free
+              </Link>
+            </div>
+
+            {/* Pro Micro-Roaster */}
+            <div className="flex flex-col rounded-card border border-honey-300 bg-white p-8 shadow-md">
+              <div className="mb-2 self-start rounded-badge bg-honey-100 px-2.5 py-0.5 text-xs font-semibold text-honey-700">
+                Most popular
+              </div>
+              <p className="text-sm font-medium text-muted">Pro Micro-Roaster</p>
+              <p className="mt-1 text-4xl font-bold text-text">$29</p>
+              <p className="mt-1 text-xs text-muted">per month</p>
+              <ul className="my-8 flex-1 space-y-3 text-sm text-text">
+                {["Everything in Free", "Price alerts on saved origins", "Shopify description generator", "Harvest calendar", "CSV export (500 rows/mo)"].map((f) => (
+                  <li key={f} className="flex items-start gap-2">
+                    <span className="mt-0.5 text-honey-500">✓</span>{f}
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href="/pro"
+                className="block w-full rounded-badge bg-honey-500 py-2.5 text-center text-sm font-semibold text-white transition-colors hover:bg-honey-600"
+              >
+                Start free trial
+              </Link>
+            </div>
+
+            {/* Pro */}
+            <div className="flex flex-col rounded-card border border-border bg-white p-8">
+              <p className="text-sm font-medium text-muted">Pro</p>
+              <p className="mt-1 text-4xl font-bold text-text">$99</p>
+              <p className="mt-1 text-xs text-muted">per month</p>
+              <ul className="my-8 flex-1 space-y-3 text-sm text-text">
+                {["Everything in Micro-Roaster", "Full price intelligence layer", "Historical $/lb trend charts", "CSV export (unlimited)", "Priority support"].map((f) => (
+                  <li key={f} className="flex items-start gap-2">
+                    <span className="mt-0.5 text-honey-500">✓</span>{f}
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href="/pro"
+                className="block w-full rounded-badge border border-brand py-2.5 text-center text-sm font-semibold text-brand transition-colors hover:bg-cream-100"
+              >
+                View plan
+              </Link>
+            </div>
+          </div>
+
+          <p className="mt-8 text-center text-xs text-muted">
+            Need bulk data access?{" "}
+            <Link href="/pro" className="text-accent hover:underline">
+              See API plans →
+            </Link>
+          </p>
+        </div>
+      </section>
     </>
   );
 }
