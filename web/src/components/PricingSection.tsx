@@ -76,20 +76,13 @@ export function PricingSection() {
       <div className="mx-auto max-w-5xl">
         {/* Header */}
         <div className="mb-8 text-center">
-          <h2 className="text-2xl font-bold text-text">Simple, transparent pricing</h2>
-          <p className="mt-2 text-sm text-muted">Start free. Upgrade when the data pays for itself.</p>
+          <h2 className="text-4xl font-bold text-text">Simple, transparent pricing</h2>
+          <p className="mt-2 text-base text-muted">Start free. Upgrade when the data pays for itself.</p>
         </div>
 
         {/* Toggle */}
-        <div className="mb-10 flex items-center justify-center gap-3">
+        <div className="mb-10 flex justify-center">
           <BillingToggle value={billing} onChange={setBilling} />
-          <span
-            className={`text-xs font-semibold text-green-700 transition-opacity duration-200 ${
-              billing === "yearly" ? "opacity-100" : "opacity-0"
-            }`}
-          >
-            Save 20%
-          </span>
         </div>
 
         {/* Cards */}

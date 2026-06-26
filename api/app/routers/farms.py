@@ -14,17 +14,29 @@ from app.schemas.pagination import Page
 router = APIRouter()
 
 
+def _country_from_slug(slug: str) -> Optional[str]:
+    """Derive country from slug prefix when origin_id is missing (e.g. nicaragua--farm-name)."""
+    prefix = slug.split("--", 1)[0]
+    if not prefix:
+        return None
+    return " ".join(word.capitalize() for word in prefix.split("-"))
+
+
+def _resolve_country(farm: Farm) -> Optional[str]:
+    if farm.origin:
+        return farm.origin.country
+    return _country_from_slug(farm.slug)
+
+
 def _farm_to_summary(farm: Farm) -> FarmSummary:
     d = FarmSummary.model_validate(farm)
-    if farm.origin:
-        d.country = farm.origin.country
+    d.country = _resolve_country(farm)
     return d
 
 
 def _farm_to_detail(farm: Farm) -> FarmDetail:
     d = FarmDetail.model_validate(farm)
-    if farm.origin:
-        d.country = farm.origin.country
+    d.country = _resolve_country(farm)
     return d
 
 

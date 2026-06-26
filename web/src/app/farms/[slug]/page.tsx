@@ -4,6 +4,7 @@ import { api } from "@/lib/api";
 import { CountryBanner } from "@/components/CountryBanner";
 import { LotTable } from "@/components/LotTable";
 import { ScoreBadge } from "@/components/ScoreBadge";
+import { resolveFarmCountry } from "@/lib/farmCountry";
 
 type Params = Promise<{ slug: string }>;
 
@@ -51,15 +52,17 @@ export default async function FarmDetailPage({ params }: { params: Params }) {
     .filter((s): s is number => s != null)
     .sort((a, b) => b - a)[0] ?? null;
 
+  const country = resolveFarmCountry(farm);
+
   return (
     <>
-      <CountryBanner country={farm.country} variant="banner" priority />
+      <CountryBanner country={country} variant="banner" priority />
 
       <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
       {/* Header */}
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="mb-1 text-sm text-muted">{farm.country ?? "Unknown origin"}</p>
+          <p className="mb-1 text-sm text-muted">{country ?? "Unknown origin"}</p>
           <h1 className="text-2xl font-bold text-text">{farm.canonical_name}</h1>
           {farm.owner_name && (
             <p className="mt-1 text-sm text-muted">Owner: {farm.owner_name}</p>

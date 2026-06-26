@@ -77,7 +77,7 @@ export default async function HomePage() {
       {/* Feature cards */}
       <section className="px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-5xl">
-          <h2 className="mb-10 text-center text-2xl font-bold text-text">
+          <h2 className="mb-10 text-center text-4xl font-bold text-text">
             What you can do with BeanBase
           </h2>
           <div className="grid gap-6 sm:grid-cols-3">

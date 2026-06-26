@@ -1,14 +1,17 @@
 import Link from "next/link";
 import type { FarmSummary } from "@/lib/api";
+import { resolveFarmCountry } from "@/lib/farmCountry";
 import { CountryBanner } from "./CountryBanner";
 
 export function FarmCard({ farm }: { farm: FarmSummary }) {
+  const country = resolveFarmCountry(farm);
+
   return (
     <Link
       href={`/farms/${farm.slug}`}
       className="group flex flex-col overflow-hidden rounded-card border border-border bg-white transition-shadow hover:shadow-md"
     >
-      <CountryBanner country={farm.country} variant="card" />
+      <CountryBanner country={country} variant="card" />
 
       <div className="flex flex-col gap-2 p-4">
         <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-text group-hover:text-brand">
@@ -21,8 +24,8 @@ export function FarmCard({ farm }: { farm: FarmSummary }) {
           </span>
         )}
 
-        {farm.country && (
-          <p className="text-xs text-muted">{farm.country}</p>
+        {country && (
+          <p className="text-xs text-muted">{country}</p>
         )}
 
         {farm.process_methods && farm.process_methods.length > 0 && (

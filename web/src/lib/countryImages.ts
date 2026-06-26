@@ -12,11 +12,14 @@ const COUNTRY_IMAGE_FILES: Record<string, string> = {
   Colombia: "guatape-colombia-1594925778.jpg",
   "Costa Rica": "sunset-in-monteverde-royalty-free-image-1728411398.jpg",
   Ecuador: "luxury-cruising-m-y-kontiki-wayri-ship-1666885845.jpg",
-  "El Salvador": "sunset-in-monteverde-royalty-free-image-1728411398.jpg",
+  "El Salvador":
+    "las-palmitas-in-mexico-royalty-free-image-1625803338.jpg",
   Ethiopia: "dallol-danakil-depression-ethiopia-the-hottest-royalty-free-image-1625765852.jpg",
-  Guatemala: "sunset-in-monteverde-royalty-free-image-1728411398.jpg",
+  Guatemala:
+    "beautiful-bay-of-lake-atitlan-with-view-to-volcano-royalty-free-image-1728419918.jpg",
   Honduras:
     "bamboo-forest-and-entryway-to-lancetilla-arboretum-royalty-free-image-1743389248.pjpeg",
+  India: "taj-majal-at-sunrise-in-agra-india-royalty-free-image-1719601420.jpg",
   Indonesia: "pura-ulun-danu-bratan-temple-in-bali-royalty-free-image-1719601267.jpg",
   Kenya: "kenya-suyian-lodge-guest-area-exterior-6766f9b60d6ff.jpg",
   Mexico: "narrow-street-in-the-old-town-of-san-miguel-de-royalty-free-image-1719599371.jpg",

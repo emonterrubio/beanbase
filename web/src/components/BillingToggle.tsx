@@ -9,14 +9,12 @@ interface Props {
 
 export function BillingToggle({ value, onChange }: Props) {
   return (
-    <div className="relative inline-flex rounded-full bg-fog-100 p-1">
-      {/* Sliding white pill */}
+    <div className="relative inline-flex rounded-full border border-honey-300 bg-honey-100/30 p-1.5">
       <div
         aria-hidden
-        className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-full bg-white shadow-sm transition-transform duration-300 ease-in-out ${
-          value === "yearly" ? "translate-x-[calc(100%+8px)]" : "translate-x-0"
+        className={`absolute top-1.5 bottom-1.5 w-[calc(50%-8px)] rounded-full bg-white transition-[left] duration-300 ease-in-out ${
+          value === "yearly" ? "left-[calc(50%+3px)]" : "left-1.5"
         }`}
-        style={{ left: 4 }}
       />
 
       {(["monthly", "yearly"] as const).map((option) => (
