@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
-import { auth } from "@clerk/nextjs/server";
 
 const LINKS = [
   { href: "/farms",    label: "Farms"    },
@@ -8,8 +7,14 @@ const LINKS = [
   { href: "/origins",  label: "Origins"  },
 ];
 
+const CLERK_CONFIGURED = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
+
 export async function Nav() {
-  const { userId } = await auth();
+  let userId: string | null = null;
+  if (CLERK_CONFIGURED) {
+    const { auth } = await import("@clerk/nextjs/server");
+    ({ userId } = await auth());
+  }
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-white/95 backdrop-blur">
