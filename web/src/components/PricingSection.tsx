@@ -2,13 +2,15 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { BillingToggle } from "@/components/BillingToggle";
+
+type Billing = "monthly" | "yearly";
 
 const PLANS = [
   {
     name: "Free",
     monthly: 0,
     yearly: 0,
-    period: "forever",
     features: [
       "Farm Explorer",
       "25 years of CoE auction history",
@@ -23,7 +25,6 @@ const PLANS = [
     name: "Pro Micro-Roaster",
     monthly: 29,
     yearly: 23,
-    yearlyTotal: 276,
     features: [
       "Everything in Free",
       "Price alerts on saved origins",
@@ -39,7 +40,6 @@ const PLANS = [
     name: "Pro",
     monthly: 99,
     yearly: 79,
-    yearlyTotal: 948,
     features: [
       "Everything in Micro-Roaster",
       "Full price intelligence layer",
@@ -53,72 +53,68 @@ const PLANS = [
   },
 ] as const;
 
+function getPrice(plan: typeof PLANS[number], billing: Billing) {
+  return billing === "yearly" ? plan.yearly : plan.monthly;
+}
+
+function getPeriod(plan: typeof PLANS[number], billing: Billing) {
+  if (plan.monthly === 0) return "forever";
+  return billing === "yearly" ? "per month, billed yearly" : "per month";
+}
+
+function getSavings(plan: typeof PLANS[number], billing: Billing) {
+  if (plan.monthly === 0 || billing === "monthly") return null;
+  const saved = (plan.monthly - plan.yearly) * 12;
+  return `Save $${saved}/yr`;
+}
+
 export function PricingSection() {
-  const [billing, setBilling] = useState<"monthly" | "yearly">("monthly");
-  const yearly = billing === "yearly";
+  const [billing, setBilling] = useState<Billing>("monthly");
 
   return (
     <section className="border-t border-border bg-cream-50 px-4 py-20 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-5xl">
         {/* Header */}
-        <div className="mb-10 text-center">
+        <div className="mb-8 text-center">
           <h2 className="text-2xl font-bold text-text">Simple, transparent pricing</h2>
           <p className="mt-2 text-sm text-muted">Start free. Upgrade when the data pays for itself.</p>
         </div>
 
         {/* Toggle */}
-        <div className="mb-12 flex items-center justify-center gap-4">
-          <span className={`text-sm font-medium transition-colors ${!yearly ? "text-text" : "text-muted"}`}>
-            Monthly
-          </span>
-          <button
-            onClick={() => setBilling(yearly ? "monthly" : "yearly")}
-            aria-label="Toggle billing period"
-            className="relative h-7 w-14 rounded-full bg-fog-200 transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-honey-500"
+        <div className="mb-10 flex items-center justify-center gap-3">
+          <BillingToggle value={billing} onChange={setBilling} />
+          <span
+            className={`text-xs font-semibold text-green-700 transition-opacity duration-200 ${
+              billing === "yearly" ? "opacity-100" : "opacity-0"
+            }`}
           >
-            <span
-              className={`absolute top-1 h-5 w-5 rounded-full bg-honey-500 shadow transition-transform duration-300 ease-in-out ${
-                yearly ? "translate-x-8" : "translate-x-1"
-              }`}
-            />
-          </button>
-          <span className={`flex items-center gap-2 text-sm font-medium transition-colors ${yearly ? "text-text" : "text-muted"}`}>
-            Yearly
-            <span className="rounded-badge bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-700">
-              Save 20%
-            </span>
+            Save 20%
           </span>
         </div>
 
         {/* Cards */}
         <div className="grid gap-6 sm:grid-cols-3">
           {PLANS.map((plan) => {
-            const price = yearly ? plan.yearly : plan.monthly;
-            const period = plan.monthly === 0
-              ? "forever"
-              : yearly
-              ? "per month, billed yearly"
-              : "per month";
+            const price = getPrice(plan, billing);
+            const period = getPeriod(plan, billing);
+            const savings = getSavings(plan, billing);
 
             return (
               <div
                 key={plan.name}
                 className={`flex flex-col rounded-card border bg-white p-8 ${
-                  plan.highlighted
-                    ? "border-honey-300 shadow-md"
-                    : "border-border"
+                  plan.highlighted ? "border-honey-300 shadow-md" : "border-border"
                 }`}
               >
                 {plan.highlighted && (
-                  <div className="mb-2 self-start rounded-badge bg-honey-100 px-2.5 py-0.5 text-xs font-semibold text-honey-700">
+                  <div className="mb-3 self-start rounded-badge bg-honey-100 px-2.5 py-0.5 text-xs font-semibold text-honey-700">
                     Most popular
                   </div>
                 )}
 
                 <p className="text-sm font-medium text-muted">{plan.name}</p>
 
-                {/* Animated price */}
-                <div className="mt-1 flex items-end gap-1">
+                <div className="mt-1 flex items-baseline gap-1">
                   <span
                     key={`${plan.name}-${billing}`}
                     className="animate-fade-in text-4xl font-bold tabular-nums text-text"
@@ -126,13 +122,13 @@ export function PricingSection() {
                     {price === 0 ? "Free" : `$${price}`}
                   </span>
                 </div>
-                <p className="mt-1 text-xs text-muted">{period}</p>
 
-                {"yearlyTotal" in plan && yearly && (
-                  <p className="mt-1 text-xs font-medium text-green-600">
-                    ${plan.yearlyTotal}/yr — save ${(plan.monthly - plan.yearly) * 12}/yr
-                  </p>
-                )}
+                <div className="mt-1 min-h-[2.5rem]">
+                  <p className="text-xs text-muted">{period}</p>
+                  {savings && (
+                    <p className="animate-fade-in text-xs font-medium text-green-600">{savings}</p>
+                  )}
+                </div>
 
                 <ul className="my-8 flex-1 space-y-3 text-sm text-text">
                   {plan.features.map((f) => (
