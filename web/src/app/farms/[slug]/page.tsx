@@ -5,6 +5,12 @@ import { CountryBanner } from "@/components/CountryBanner";
 import { LotTable } from "@/components/LotTable";
 import { ScoreBadge } from "@/components/ScoreBadge";
 import { resolveFarmCountry } from "@/lib/farmCountry";
+import {
+  hasLotTitleData,
+  LOT_TITLE_FIELDS,
+  lotTitleValue,
+} from "@/lib/farmDisplay";
+import { formatSourceLabel } from "@/lib/farmFilters";
 
 type Params = Promise<{ slug: string }>;
 
@@ -65,7 +71,9 @@ export default async function FarmDetailPage({ params }: { params: Params }) {
           <p className="mb-1 text-sm text-muted">{country ?? "Unknown origin"}</p>
           <h1 className="text-2xl font-bold text-text">{farm.canonical_name}</h1>
           {farm.owner_name && (
-            <p className="mt-1 text-sm text-muted">Owner: {farm.owner_name}</p>
+            <p className="mt-1 text-sm text-muted">
+              Producer / Micro-Region: {farm.owner_name}
+            </p>
           )}
         </div>
         {topScore != null && (
@@ -76,11 +84,24 @@ export default async function FarmDetailPage({ params }: { params: Params }) {
         )}
       </div>
 
+      {/* Lot title breakdown (importer offerings) */}
+      {hasLotTitleData(farm) && (
+        <dl className="mb-6 grid grid-cols-2 gap-x-8 gap-y-4 rounded-card border border-border bg-white p-6 text-sm sm:grid-cols-3 lg:grid-cols-4">
+          {LOT_TITLE_FIELDS.map(({ key, label }) => (
+            <div key={key}>
+              <dt className="text-xs text-muted">{label}</dt>
+              <dd className="mt-0.5 font-medium text-text">{lotTitleValue(farm, key)}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
+
       {/* Metadata grid */}
       <dl className="mb-10 grid grid-cols-2 gap-x-8 gap-y-3 rounded-card border border-border bg-white p-6 text-sm sm:grid-cols-3">
         {[
-          { label: "Altitude",    value: farm.altitude_m ? `${farm.altitude_m}m` : null },
-          { label: "Source",      value: farm.source },
+          { label: "Origin", value: country },
+          { label: "Altitude", value: farm.altitude_m ? `${farm.altitude_m}m` : null },
+          { label: "Source", value: farm.source ? formatSourceLabel(farm.source) : null },
           { label: "Cooperative", value: farm.cooperative_name },
         ].map(({ label, value }) =>
           value ? (

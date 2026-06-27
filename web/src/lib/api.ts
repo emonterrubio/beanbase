@@ -18,6 +18,12 @@ export interface FarmSummary {
   id: number;
   slug: string;
   canonical_name: string;
+  owner_name: string | null;
+  municipality: string | null;
+  department: string | null;
+  lot_varietal: string | null;
+  lot_process: string | null;
+  packaging_type: string | null;
   origin_id: number | null;
   country: string | null;
   process_methods: string[] | null;
@@ -25,14 +31,20 @@ export interface FarmSummary {
   source: string | null;
 }
 
+export interface FarmFacets {
+  origins: string[];
+  sources: string[];
+  processes: string[];
+}
+
 export interface FarmDetail extends FarmSummary {
   altitude_m: number | null;
-  owner_name: string | null;
   cooperative_name: string | null;
   latitude: number | null;
   longitude: number | null;
   flavor_tags: string[] | null;
   importer_ids: Record<string, unknown> | null;
+  source_lot_title: string | null;
 }
 
 export interface LotRow {
@@ -81,8 +93,16 @@ export interface FarmParams extends Record<string, ParamValue> {
   origin?: string;
   process?: string;
   source?: string;
+  sort?: "asc" | "desc";
   page?: number;
   page_size?: number;
+}
+
+export interface FarmFacetParams extends Record<string, ParamValue> {
+  q?: string;
+  origin?: string;
+  process?: string;
+  source?: string;
 }
 
 export interface LotParams extends Record<string, ParamValue> {
@@ -133,6 +153,9 @@ export const api = {
   farms: {
     list: (params?: FarmParams) =>
       apiFetch<Page<FarmSummary>>("/farms", params),
+
+    facets: (params?: FarmFacetParams) =>
+      apiFetch<FarmFacets>("/farms/facets", params),
 
     get: (slug: string) =>
       apiFetch<FarmDetail>(`/farms/${encodeURIComponent(slug)}`),

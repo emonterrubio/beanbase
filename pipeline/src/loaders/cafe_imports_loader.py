@@ -25,6 +25,7 @@ from sqlalchemy import create_engine, text
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from normalizers import slugify
+from normalizers.farm_name import parse_importer_lot_name
 from normalizers.process_method import normalize as norm_process
 
 load_dotenv(Path(__file__).resolve().parents[3] / "api" / ".env")
@@ -58,11 +59,19 @@ def _group_by_producer(rows: list) -> Dict[str, dict]:
             continue
 
         key = f"{slugify(origin)}--{slugify(name)}"
+        parsed = parse_importer_lot_name(name)
 
         if key not in groups:
             groups[key] = {
                 "slug": key,
-                "canonical_name": name,
+                "source_lot_title": name,
+                "canonical_name": parsed.farm_name,
+                "owner_name": parsed.owner_name,
+                "municipality": parsed.municipality,
+                "department": parsed.department,
+                "lot_varietal": parsed.varietal,
+                "lot_process": parsed.process_hint,
+                "packaging_type": parsed.packaging_type,
                 "origin": origin,
                 "processes": [],
                 "offering_ids": [],
@@ -124,24 +133,57 @@ def load(rows: list) -> dict:
                 conn.execute(
                     text("""
                         UPDATE farms SET
+                            canonical_name = :name,
+                            owner_name = COALESCE(:owner, owner_name),
+                            municipality = COALESCE(:municipality, municipality),
+                            department = COALESCE(:department, department),
+                            lot_varietal = COALESCE(:lot_varietal, lot_varietal),
+                            lot_process = COALESCE(:lot_process, lot_process),
+                            packaging_type = COALESCE(:packaging_type, packaging_type),
+                            source_lot_title = COALESCE(:source_lot_title, source_lot_title),
                             process_methods = :pm,
                             importer_ids = :imp
                         WHERE id = :id
                     """),
-                    {"pm": merged_procs, "imp": json.dumps(existing_imp), "id": existing.id},
+                    {
+                        "name": g["canonical_name"],
+                        "owner": g.get("owner_name"),
+                        "municipality": g.get("municipality"),
+                        "department": g.get("department"),
+                        "lot_varietal": g.get("lot_varietal"),
+                        "lot_process": g.get("lot_process"),
+                        "packaging_type": g.get("packaging_type"),
+                        "source_lot_title": g.get("source_lot_title"),
+                        "pm": merged_procs,
+                        "imp": json.dumps(existing_imp),
+                        "id": existing.id,
+                    },
                 )
                 counts["updated"] += 1
             else:
                 conn.execute(
                     text("""
-                        INSERT INTO farms
-                            (slug, canonical_name, origin_id, process_methods, importer_ids, source)
-                        VALUES
-                            (:slug, :name, :origin_id, :pm, :imp, 'cafe_imports')
+                        INSERT INTO farms (
+                            slug, canonical_name, owner_name, municipality, department,
+                            lot_varietal, lot_process, packaging_type, source_lot_title,
+                            origin_id, process_methods, importer_ids, source
+                        )
+                        VALUES (
+                            :slug, :name, :owner, :municipality, :department,
+                            :lot_varietal, :lot_process, :packaging_type, :source_lot_title,
+                            :origin_id, :pm, :imp, 'cafe_imports'
+                        )
                     """),
                     {
                         "slug": slug,
                         "name": g["canonical_name"],
+                        "owner": g.get("owner_name"),
+                        "municipality": g.get("municipality"),
+                        "department": g.get("department"),
+                        "lot_varietal": g.get("lot_varietal"),
+                        "lot_process": g.get("lot_process"),
+                        "packaging_type": g.get("packaging_type"),
+                        "source_lot_title": g.get("source_lot_title"),
                         "origin_id": origin_id,
                         "pm": processes,
                         "imp": json.dumps(importer_ids),

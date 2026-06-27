@@ -54,7 +54,7 @@ export function SearchBar({
         defaultValue={defaultValue}
         onChange={handleChange}
         placeholder={placeholder}
-        className="w-full rounded-card border border-border bg-white py-2 pl-9 pr-4 text-sm text-text placeholder:text-muted focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+        className="w-full rounded-card border border-border bg-white py-2.5 pl-9 pr-4 text-sm text-text placeholder:text-muted focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
       />
     </div>
   );

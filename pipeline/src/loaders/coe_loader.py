@@ -60,12 +60,21 @@ def _lot_number(rank_str: str) -> Optional[int]:
 # Upsert helpers
 # ---------------------------------------------------------------------------
 
-def _upsert_farm(conn, canonical_name: str, origin_id: Optional[int],
-                 country_slug: str, process: str, varietal: str, source: str) -> Optional[int]:
+def _upsert_farm(
+    conn,
+    canonical_name: str,
+    origin_id: Optional[int],
+    country_slug: str,
+    process: str,
+    varietal: str,
+    source: str,
+    owner_name: Optional[str] = None,
+    slug_key: Optional[str] = None,
+) -> Optional[int]:
     if not canonical_name:
         return None
 
-    farm_slug = f"{country_slug}--{slugify(canonical_name)}"
+    farm_slug = f"{country_slug}--{slugify(slug_key or canonical_name)}"
     process_arr = [norm_process(process)] if process else []
     varietal_arr = [varietal] if varietal else []
 
@@ -84,22 +93,32 @@ def _upsert_farm(conn, canonical_name: str, origin_id: Optional[int],
         conn.execute(
             text("""
                 UPDATE farms
-                SET process_methods = :pm, varietals = :var
+                SET canonical_name = :name,
+                    owner_name = COALESCE(:owner, owner_name),
+                    process_methods = :pm,
+                    varietals = :var
                 WHERE id = :id
             """),
-            {"pm": merged_processes, "var": merged_varietals, "id": existing.id},
+            {
+                "name": canonical_name,
+                "owner": owner_name,
+                "pm": merged_processes,
+                "var": merged_varietals,
+                "id": existing.id,
+            },
         )
         return existing.id
 
     result = conn.execute(
         text("""
-            INSERT INTO farms (slug, canonical_name, origin_id, process_methods, varietals, source)
-            VALUES (:slug, :name, :origin_id, :pm, :var, :source)
+            INSERT INTO farms (slug, canonical_name, owner_name, origin_id, process_methods, varietals, source)
+            VALUES (:slug, :name, :owner, :origin_id, :pm, :var, :source)
             RETURNING id
         """),
         {
             "slug": farm_slug,
             "name": canonical_name,
+            "owner": owner_name,
             "origin_id": origin_id,
             "pm": process_arr,
             "var": varietal_arr,
@@ -247,16 +266,23 @@ def load(rows: list) -> dict:
                 counts["skipped"] += 1
                 continue
 
-            # Farm: prefer ProducerName, fall back to FarmName
+            # Farm: FarmName is the estate; ProducerName is the owner
             producer = str(row.get("ProducerName", "") or "").strip()
             farm_name = str(row.get("FarmName", "") or "").strip()
-            canonical_name = producer or farm_name
+            canonical_name = farm_name or producer
+            owner_name = producer if farm_name else None
+            slug_key = producer or farm_name
 
             farm_id = _upsert_farm(
-                conn, canonical_name, origin_id, country_slug,
+                conn,
+                canonical_name,
+                origin_id,
+                country_slug,
                 str(row.get("Process", "") or ""),
                 str(row.get("Varietal", "") or ""),
                 "cup_of_excellence",
+                owner_name=owner_name,
+                slug_key=slug_key,
             )
 
             event_id = _get_or_create_auction_event(
