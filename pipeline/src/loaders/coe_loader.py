@@ -70,6 +70,8 @@ def _upsert_farm(
     source: str,
     owner_name: Optional[str] = None,
     slug_key: Optional[str] = None,
+    municipality: Optional[str] = None,
+    department: Optional[str] = None,
 ) -> Optional[int]:
     if not canonical_name:
         return None
@@ -95,6 +97,8 @@ def _upsert_farm(
                 UPDATE farms
                 SET canonical_name = :name,
                     owner_name = COALESCE(:owner, owner_name),
+                    municipality = COALESCE(:municipality, municipality),
+                    department = COALESCE(:department, department),
                     process_methods = :pm,
                     varietals = :var
                 WHERE id = :id
@@ -102,6 +106,8 @@ def _upsert_farm(
             {
                 "name": canonical_name,
                 "owner": owner_name,
+                "municipality": municipality,
+                "department": department,
                 "pm": merged_processes,
                 "var": merged_varietals,
                 "id": existing.id,
@@ -111,14 +117,22 @@ def _upsert_farm(
 
     result = conn.execute(
         text("""
-            INSERT INTO farms (slug, canonical_name, owner_name, origin_id, process_methods, varietals, source)
-            VALUES (:slug, :name, :owner, :origin_id, :pm, :var, :source)
+            INSERT INTO farms (
+                slug, canonical_name, owner_name, municipality, department,
+                origin_id, process_methods, varietals, source
+            )
+            VALUES (
+                :slug, :name, :owner, :municipality, :department,
+                :origin_id, :pm, :var, :source
+            )
             RETURNING id
         """),
         {
             "slug": farm_slug,
             "name": canonical_name,
             "owner": owner_name,
+            "municipality": municipality,
+            "department": department,
             "origin_id": origin_id,
             "pm": process_arr,
             "var": varietal_arr,
@@ -273,6 +287,8 @@ def load(rows: list) -> dict:
             owner_name = producer if farm_name else None
             slug_key = producer or farm_name
 
+            region = str(row.get("Region", "") or "").strip()
+
             farm_id = _upsert_farm(
                 conn,
                 canonical_name,
@@ -283,6 +299,7 @@ def load(rows: list) -> dict:
                 "cup_of_excellence",
                 owner_name=owner_name,
                 slug_key=slug_key,
+                department=region or None,
             )
 
             event_id = _get_or_create_auction_event(

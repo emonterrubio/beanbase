@@ -102,6 +102,13 @@ def _group_by_producer(rows: list) -> Dict[str, dict]:
     return groups
 
 
+def _finalize_geo_fields(g: dict) -> None:
+    """Use Cafe Imports Region column when title parsing missed department."""
+    region = (g.get("region") or "").strip()
+    if region and not g.get("department"):
+        g["department"] = region
+
+
 def load(rows: list) -> dict:
     if not rows:
         return {"inserted": 0, "updated": 0, "skipped": 0}
@@ -109,6 +116,8 @@ def load(rows: list) -> dict:
     engine = _get_engine()
     counts = {"inserted": 0, "updated": 0, "skipped": 0}
     groups = _group_by_producer(rows)
+    for g in groups.values():
+        _finalize_geo_fields(g)
 
     with engine.begin() as conn:
         origin_cache = _origin_id_cache(conn)

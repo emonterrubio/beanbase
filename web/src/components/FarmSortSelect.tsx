@@ -15,11 +15,9 @@ interface Props {
   sort: FarmSort;
   searchQuery: string;
   origin: string;
-  source: string;
-  process: string;
 }
 
-export function FarmSortSelect({ sort, searchQuery, origin, source, process }: Props) {
+export function FarmSortSelect({ sort, searchQuery, origin }: Props) {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -27,8 +25,6 @@ export function FarmSortSelect({ sort, searchQuery, origin, source, process }: P
     const params = new URLSearchParams();
     if (searchQuery.trim()) params.set("q", searchQuery.trim());
     if (origin) params.set("origin", origin);
-    if (source) params.set("source", source);
-    if (process) params.set("process", process);
     if (value !== "asc") params.set("sort", value);
     params.set("page", "1");
     router.push(`${pathname}?${params.toString()}`);

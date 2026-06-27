@@ -2,8 +2,8 @@
 """
 Backfill parsed lot-title fields for existing farms.
 
-- cafe_imports: re-parse source_lot_title or legacy canonical_name
-- cup_of_excellence: re-read CoE JSON files for FarmName / ProducerName
+- cafe_imports: re-parse source_lot_title + Region from sample JSON
+- cup_of_excellence: re-read CoE JSON files for FarmName / ProducerName / Region
 
 Usage:
   cd pipeline && python scripts/backfill_farm_names.py [--dry-run]
@@ -25,6 +25,7 @@ from normalizers import slugify
 from normalizers.farm_name import parse_importer_lot_name
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data" / "coe"
+CAFE_SAMPLES = Path(__file__).resolve().parents[1] / "data" / "samples"
 
 _LOT_TITLE_FIELDS = """
     canonical_name = :name,
@@ -38,12 +39,13 @@ _LOT_TITLE_FIELDS = """
 """
 
 
-def _parsed_params(parsed, source_lot_title: str | None) -> dict:
+def _parsed_params(parsed, source_lot_title: str | None, region: str | None = None) -> dict:
+    department = parsed.department or (region.strip() if region else None) or None
     return {
         "name": parsed.farm_name,
         "owner": parsed.owner_name,
         "municipality": parsed.municipality,
-        "department": parsed.department,
+        "department": department,
         "lot_varietal": parsed.varietal,
         "lot_process": parsed.process_hint,
         "packaging_type": parsed.packaging_type,
@@ -51,23 +53,45 @@ def _parsed_params(parsed, source_lot_title: str | None) -> dict:
     }
 
 
+def _load_cafe_imports_map() -> dict[str, dict]:
+    """Map farm slug → parsed fields + Region from sample JSON files."""
+    mapping: dict[str, dict] = {}
+    for path in sorted(CAFE_SAMPLES.glob("cafe_imports_*.json")):
+        with open(path, encoding="utf-8") as f:
+            rows = json.load(f)
+        for row in rows:
+            origin = str(row.get("Origin", "") or "").strip()
+            name = str(row.get("Name", "") or "").strip()
+            if not origin or not name:
+                continue
+            slug = f"{slugify(origin)}--{slugify(name)}"
+            region = str(row.get("Region", "") or "").strip()
+            parsed = parse_importer_lot_name(name)
+            mapping[slug] = _parsed_params(parsed, name, region)
+    return mapping
+
+
 def backfill_cafe_imports(conn, dry_run: bool) -> int:
+    cafe_map = _load_cafe_imports_map()
     rows = conn.execute(
         text("""
-            SELECT id, canonical_name, source_lot_title
+            SELECT id, slug, canonical_name, source_lot_title
             FROM farms WHERE source = 'cafe_imports'
         """)
     ).fetchall()
     updated = 0
     for row in rows:
-        raw = row.source_lot_title or row.canonical_name
-        parsed = parse_importer_lot_name(raw)
-        if not parsed.farm_name:
-            continue
-        params = _parsed_params(parsed, raw if not row.source_lot_title else row.source_lot_title)
+        if row.slug in cafe_map:
+            params = cafe_map[row.slug]
+        else:
+            raw = row.source_lot_title or row.canonical_name
+            parsed = parse_importer_lot_name(raw)
+            if not parsed.farm_name:
+                continue
+            params = _parsed_params(parsed, raw)
         if dry_run:
-            print(f"[cafe_imports] {row.id}: {raw!r}")
-            print(f"  → {params}")
+            print(f"[cafe_imports] {row.id}: {row.slug!r}")
+            print(f"  → dept={params['department']!r}, muni={params['municipality']!r}")
         else:
             conn.execute(
                 text(f"UPDATE farms SET {_LOT_TITLE_FIELDS} WHERE id = :id"),
@@ -77,9 +101,9 @@ def backfill_cafe_imports(conn, dry_run: bool) -> int:
     return updated
 
 
-def _load_coe_farm_map() -> dict[str, tuple[str, str | None]]:
-    """Map slug → (canonical_name, owner_name) from all CoE JSON files."""
-    mapping: dict[str, tuple[str, str | None]] = {}
+def _load_coe_farm_map() -> dict[str, dict]:
+    """Map slug → farm fields from all CoE JSON files."""
+    mapping: dict[str, dict] = {}
     if not DATA_DIR.exists():
         return mapping
 
@@ -98,38 +122,49 @@ def _load_coe_farm_map() -> dict[str, tuple[str, str | None]]:
         for lot in lots:
             producer = str(lot.get("ProducerName", "") or "").strip()
             farm_name = str(lot.get("FarmName", "") or "").strip()
+            region = str(lot.get("Region", "") or "").strip()
             if not producer and not farm_name:
                 continue
             canonical = farm_name or producer
             owner = producer if farm_name else None
             slug_key = producer or farm_name
             slug = f"{country_slug}--{slugify(slug_key)}"
-            mapping[slug] = (canonical, owner)
+            mapping[slug] = {
+                "name": canonical,
+                "owner": owner,
+                "municipality": None,
+                "department": region or None,
+                "lot_varietal": None,
+                "lot_process": None,
+                "packaging_type": None,
+                "source_lot_title": None,
+            }
     return mapping
 
 
 def backfill_coe(conn, dry_run: bool) -> int:
     farm_map = _load_coe_farm_map()
     rows = conn.execute(
-        text("SELECT id, slug, canonical_name, owner_name FROM farms WHERE source = 'cup_of_excellence'")
+        text("SELECT id, slug FROM farms WHERE source = 'cup_of_excellence'")
     ).fetchall()
     updated = 0
     for row in rows:
         if row.slug not in farm_map:
             continue
-        canonical, owner = farm_map[row.slug]
-        if row.canonical_name == canonical and row.owner_name == owner:
-            continue
-        if dry_run:
-            print(f"[coe] {row.slug}: {row.canonical_name!r} → {canonical!r}, owner={owner!r}")
-        else:
+        params = farm_map[row.slug]
+        if dry_run and updated < 5:
+            print(f"[coe] {row.slug}: dept={params['department']!r}")
+        elif not dry_run:
             conn.execute(
-                text("""
-                    UPDATE farms
-                    SET canonical_name = :name, owner_name = :owner
+                text(f"""
+                    UPDATE farms SET
+                        canonical_name = :name,
+                        owner_name = :owner,
+                        municipality = :municipality,
+                        department = :department
                     WHERE id = :id
                 """),
-                {"name": canonical, "owner": owner, "id": row.id},
+                {**params, "id": row.id},
             )
         updated += 1
     return updated

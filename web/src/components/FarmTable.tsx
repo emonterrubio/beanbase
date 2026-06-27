@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { FarmSummary } from "@/lib/api";
 import { farmCell, displayProcess, displayVarietal } from "@/lib/farmDisplay";
+import { formatSourceLabel } from "@/lib/farmFilters";
 
 export function FarmTable({ farms }: { farms: FarmSummary[] }) {
   if (farms.length === 0) {
@@ -13,11 +14,12 @@ export function FarmTable({ farms }: { farms: FarmSummary[] }) {
 
   return (
     <div className="overflow-x-auto rounded-card border border-border">
-      <table className="w-full min-w-[64rem] text-sm">
+      <table className="w-full min-w-[72rem] text-sm">
         <thead>
           <tr className="border-b border-border bg-cream-50 text-xs uppercase tracking-wide text-muted">
             <th className="px-3 py-3 text-left">Producer / Micro-Region</th>
             <th className="px-3 py-3 text-left">Farm</th>
+            <th className="px-3 py-3 text-left">Source</th>
             <th className="px-3 py-3 text-left">Municipality</th>
             <th className="px-3 py-3 text-left">Department</th>
             <th className="px-3 py-3 text-left">Varietal</th>
@@ -41,6 +43,15 @@ export function FarmTable({ farms }: { farms: FarmSummary[] }) {
                 >
                   {farm.canonical_name}
                 </Link>
+              </td>
+              <td className="whitespace-nowrap px-3 py-3">
+                {farm.source ? (
+                  <span className="rounded-badge bg-cream-100 px-2 py-0.5 text-xs text-muted">
+                    {formatSourceLabel(farm.source)}
+                  </span>
+                ) : (
+                  "—"
+                )}
               </td>
               <td className="whitespace-nowrap px-3 py-3 text-muted">
                 {farmCell(farm.municipality)}

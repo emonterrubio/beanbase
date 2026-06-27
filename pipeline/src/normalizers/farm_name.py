@@ -292,6 +292,36 @@ def _strip_trailing_metadata(parts: List[str]) -> Tuple[List[str], dict]:
     return remaining, meta
 
 
+def _geo_from_core_after_farm(
+    core: List[str], farm_idx: int
+) -> Tuple[Optional[str], Optional[str]]:
+    """Geo segments between farm name and varietal/process in the lot title."""
+    geo = [
+        p
+        for p in core[farm_idx + 1 :]
+        if not _is_varietal_segment(p) and not _is_process_segment(p)
+    ]
+    if len(geo) >= 2:
+        return geo[0], geo[-1]
+    if len(geo) == 1:
+        if _is_department_segment(geo[0]):
+            return None, geo[0]
+        return geo[0], None
+    return None, None
+
+
+def _merge_geo(
+    meta: dict, core: List[str], farm_idx: Optional[int]
+) -> Tuple[Optional[str], Optional[str]]:
+    municipality = meta.get("municipality")
+    department = meta.get("department")
+    if farm_idx is not None:
+        core_muni, core_dept = _geo_from_core_after_farm(core, farm_idx)
+        municipality = municipality or core_muni
+        department = department or core_dept
+    return municipality, department
+
+
 def _looks_like_cooperative(part: str) -> bool:
     lower = part.lower()
     return any(kw in lower for kw in _ORG_KEYWORDS)
@@ -339,11 +369,12 @@ def parse_importer_lot_name(raw: str) -> ParsedFarmName:
         owner_name: Optional[str] = None
         if farm_idx > 0 and _is_producer_prefix(core[0]):
             owner_name = core[0]
+        municipality, department = _merge_geo(meta, core, farm_idx)
         return ParsedFarmName(
             farm_name=farm_name,
             owner_name=owner_name,
-            municipality=meta.get("municipality"),
-            department=meta.get("department"),
+            municipality=municipality,
+            department=department,
             varietal=meta.get("varietal"),
             process_hint=meta.get("process_hint"),
             packaging_type=packaging,

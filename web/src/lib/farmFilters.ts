@@ -24,27 +24,29 @@ export function formatSourceLabel(source: string): string {
   return FARM_SOURCES.find((s) => s.value === source)?.label ?? source;
 }
 
-export function matchesFacet(value: string, options: string[]): boolean {
-  const lower = value.toLowerCase();
-  return options.some((o) => o.toLowerCase() === lower);
+/** Drop an origin filter value if it isn't in the valid list. */
+export function sanitizeOriginFilter(
+  origin: string,
+  validOrigins: string[],
+): { origin: string; changed: boolean } {
+  if (!origin) return { origin: "", changed: false };
+  const match = validOrigins.find((o) => o.toLowerCase() === origin.toLowerCase());
+  const resolved = match ?? "";
+  return { origin: resolved, changed: resolved !== origin };
 }
 
-/** Drop filter values that aren't valid given the other active selections. */
+/** @deprecated Use sanitizeOriginFilter — kept for any legacy callers */
 export function sanitizeFarmFilters(
   filters: { origin: string; source: string; process: string },
   facets: { origins: string[]; sources: string[]; processes: string[] },
 ): { origin: string; source: string; process: string; changed: boolean } {
-  const origin =
-    filters.origin && matchesFacet(filters.origin, facets.origins) ? filters.origin : "";
-  const source =
-    filters.source && facets.sources.includes(filters.source) ? filters.source : "";
-  const process =
-    filters.process && facets.processes.includes(filters.process) ? filters.process : "";
-  const changed =
-    origin !== filters.origin ||
-    source !== filters.source ||
-    process !== filters.process;
-  return { origin, source, process, changed };
+  const { origin, changed } = sanitizeOriginFilter(filters.origin, facets.origins);
+  return {
+    origin,
+    source: "",
+    process: "",
+    changed: changed || Boolean(filters.source || filters.process),
+  };
 }
 
 /** Build visible page numbers with ellipsis for shadcn pagination. */
