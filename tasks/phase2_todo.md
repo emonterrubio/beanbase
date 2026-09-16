@@ -1,19 +1,24 @@
 # Phase 2 — Pro Dashboard (Months 3–6)
 
-Validation gate: **10 Pro Dashboard subscribers** before starting Phase 3.
-Unlock condition: 500 free signups achieved (Phase 1 gate).
+Validation gate: **10 Pro Dashboard subscribers** before starting Phase 3.  
+Unlock condition: 500 free signups achieved (Phase 1 gate) — *engineering may proceed in parallel*.  
+Canonical overview: [docs/status.md](../docs/status.md)
+
+**Status:** Sprint 7 **code complete**; production activation pending. Sprints 8–10 not started.
 
 ---
 
-### Sprint 7: Auth + Billing ✓
+### Sprint 7: Auth + Billing ✓ (code) / ☐ (activation)
 - [x] Clerk v7 installed; ClerkProvider in layout; proxy.ts protects /dashboard and /pro/* routes
 - [x] Nav: server-side auth check — sign-in/up buttons when signed out, Dashboard + UserButton when signed in
 - [x] /sign-in and /sign-up pages using Clerk hosted UI components
 - [x] /dashboard: post-auth landing showing free vs Pro state with upgrade CTA
-- [x] /pro: pricing page with Pro Micro-Roaster ($29/mo) and Pro ($99/mo) cards
+- [x] /pro: pricing page with Pro Micro-Roaster ($29/mo) and Pro ($99/mo) cards + billing toggle
 - [x] Stripe: lazy getStripe() client; /api/billing/checkout creates sessions; /api/billing/webhook writes subscription_status to Clerk publicMetadata
 - [x] Gated routes: /pro/dashboard and /pro/alerts check publicMetadata.subscription_status === "active", redirect to /pro if not
-- [ ] Activate: set NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY + CLERK_SECRET_KEY in Vercel; create Stripe products + set STRIPE_PRICE_PRO_MICRO / STRIPE_PRICE_PRO + STRIPE_WEBHOOK_SECRET
+- [ ] **Activate:** set `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` + `CLERK_SECRET_KEY` in Vercel
+- [ ] **Activate:** create Stripe products + set `STRIPE_PRICE_PRO_MICRO` / `STRIPE_PRICE_PRO` + `STRIPE_WEBHOOK_SECRET`
+- [ ] **Verify:** end-to-end signup → checkout → webhook → Pro unlock
 
 ### Sprint 8: Pro Features
 - [ ] Lot alert system — watchlists + email notifications (price threshold, new auction)

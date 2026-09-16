@@ -38,11 +38,16 @@ beanbase/
 │   ├── migrations/         # Alembic migration files
 │   └── seeds/              # Seed data for local dev
 ├── docs/
+│   ├── README.md           # Docs index
+│   ├── status.md           # Phase roadmap — done vs remaining
 │   ├── architecture.md     # System architecture decisions
 │   ├── decisions/          # ADRs (Architecture Decision Records)
 │   └── runbooks/           # Ops runbooks
 └── tasks/
-    ├── todo.md             # Current sprint tasks
+    ├── todo.md             # Phase index
+    ├── phase1_todo.md      # Phase 1 sprint checklist
+    ├── phase2_todo.md      # Phase 2 sprint checklist
+    ├── phase3_todo.md      # Phase 3 sprint checklist
     └── lessons.md          # Accumulated lessons
 ```
 
@@ -153,37 +158,53 @@ SENTRY_DSN=
 APIFY_API_TOKEN=           # Optional, for scraping proxy
 ```
 
-## API Endpoints (Phase 3)
+## API Endpoints
+
+### Live (Phase 1 dashboard)
 
 | Endpoint | Description |
 |----------|-------------|
-| `GET /farms` | Search farm profiles with enrichment |
-| `GET /farms/{id}` | Single farm detail |
-| `GET /lots` | Query auction lots (farm, score, origin, year, process, price) |
+| `GET /health` | Health check |
+| `GET /farms` | Search farm profiles |
+| `GET /farms/facets` | Contextual filter facets |
+| `GET /farms/{slug}` | Single farm detail |
+| `GET /lots` | Query auction lots |
+| `GET /lots/{id}` | Lot detail |
 | `GET /origins` | Country/region-level origin intelligence |
+| `GET /origins/{country}` | Single origin |
+
+### Planned (Phase 3)
+
+| Endpoint | Description |
+|----------|-------------|
 | `GET /certifications` | Certification status by farm or region |
 | `GET /prices` | Price indices and trend data |
 | `GET /producers` | Longitudinal producer profiles |
 
 ## Data Pipeline — Enrichment Stages
 
-1. **Ingest** → Raw data pulled from sources, stored in staging schema
-2. **Normalize** → Field standardization, taxonomy mapping
-3. **Entity Resolution** → Cross-source deduplication to canonical records
-4. **Enrich** → Computed fields (flavor tags, altitude bands, score/price indices)
-5. **Serve** → Clean records exposed via REST API and dashboard
+1. **Ingest** → Raw data pulled from sources, stored in staging / archives *(done for CoE, Cafe Imports, Onyx)*
+2. **Normalize** → Field standardization, taxonomy mapping *(process methods + farm lot-title parser done)*
+3. **Entity Resolution** → Cross-source deduplication to canonical records *(not built yet)*
+4. **Enrich** → Computed fields (flavor tags, altitude bands, score/price indices) *(not built yet)*
+5. **Serve** → Clean records exposed via REST API and dashboard *(done)*
 
 ## Current Phase
 
-**Phase 1 — Free Discovery Dashboard** (Months 1–3)
-- [ ] CoE historical scraper (1999–present)
-- [ ] Farm entity schema + PostgreSQL setup
-- [ ] Next.js Farm Explorer + Auction History browser
-- [ ] Origin Intelligence Cards
-- [ ] SEO-optimized static pages
-- [ ] Sentry alerting on all ETL pipeline parsers
+See **[docs/status.md](docs/status.md)** for the full done-vs-remaining roadmap.
 
-Validation gate before Phase 2: **500 free signups**
+**Focus: Phase 2 — Pro Dashboard** (Sprint 7 code complete; activate Clerk/Stripe, then Sprint 8).  
+**Phase 1 engineering: complete** — free discovery beta is live.
+
+| Phase | Status | Gate |
+|-------|--------|------|
+| Phase 1 — Free Discovery Dashboard | Code ✓ | 500 free signups |
+| Phase 2 — Pro Dashboard | In progress | 10 Pro subscribers |
+| Phase 3 — API Access | Not started | 3 API customers |
+
+Sprint checklists: [`tasks/todo.md`](tasks/todo.md)
+
+Validation gate before treating Phase 2 as commercially unlocked: **500 free signups**
 
 ## Architecture Principles
 
@@ -199,7 +220,8 @@ Validation gate before Phase 2: **500 free signups**
 - Use subagents for research, exploration, and parallel analysis
 - After corrections: update `tasks/lessons.md`
 - Never mark a task complete without demonstrating it works
-- Review `tasks/lessons.md` at session start
+- Review `tasks/lessons.md` and `docs/status.md` at session start
+- Keep phase checklists (`tasks/phase*_todo.md`) and `docs/status.md` in sync when shipping milestones
 
 ## Data Sources
 

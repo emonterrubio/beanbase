@@ -72,6 +72,8 @@ python src/scrapers/coe_scraper.py
 
 ## Architecture
 
+See [docs/architecture.md](docs/architecture.md) and [docs/status.md](docs/status.md) for the live system map and phase roadmap.
+
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                        Users                            │
@@ -85,35 +87,41 @@ python src/scrapers/coe_scraper.py
                       │
 ┌─────────────────────▼───────────────────────────────────┐
 │              FastAPI Backend (Railway)                  │
-│    /farms | /lots | /origins | /prices | /producers     │
+│         /farms | /lots | /origins | /health             │
 └─────────────────────┬───────────────────────────────────┘
                       │
 ┌─────────────────────▼───────────────────────────────────┐
-│           PostgreSQL + PostGIS (Railway)                │
-│    Farm entity graph | Auction lots | Certifications    │
+│           PostgreSQL (Neon)                             │
+│    Farm entity graph | Auction lots | Origins           │
 └─────────────────────▲───────────────────────────────────┘
                       │
 ┌─────────────────────┴───────────────────────────────────┐
 │              Python ETL Pipeline                        │
-│  Ingest → Normalize → Entity Resolve → Enrich → Serve  │
+│  Ingest → Normalize → (Entity Resolve*) → Enrich* → Serve │
 │                                                         │
-│  Sources: CoE | BoP | Kenya NCE | USDA | Importers      │
+│  Live sources: CoE | Cafe Imports | Onyx                │
+│  Planned: BoP | Kenya NCE | USDA | Cert registries      │
 └─────────────────────────────────────────────────────────┘
 ```
 
-## API Endpoints
+\*Entity resolution and enrichers are planned (Phase 1 remaining / Phase 2–3); not yet implemented as pipeline stages.
+
+## API Endpoints (live today)
 
 ```
-GET /farms                   Search farm profiles
-GET /farms/{id}              Farm detail with full enrichment
+GET /health                  Health check
+GET /farms                   Search farm profiles (q, origin, source, process, sort)
+GET /farms/facets            Contextual filter facets
+GET /farms/{slug}            Farm detail
 GET /lots                    Query auction lots
-GET /origins                 Country/region origin intelligence
-GET /certifications          Certification status
-GET /prices                  Price indices and trends
-GET /producers               Longitudinal producer profiles
+GET /lots/{id}               Lot detail
+GET /origins                 Country/region origin cards
+GET /origins/{country}       Single origin
 ```
 
-Full API docs available at `/docs` (Swagger UI) when the API server is running.
+**Planned (Phase 3):** `/certifications`, `/prices`, `/producers`, API keys, metering.
+
+Interactive docs: Scalar UI at `/docs` when the API server is running.
 
 ## Pricing
 
@@ -131,29 +139,34 @@ Full API docs available at `/docs` (Swagger UI) when the API server is running.
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | Next.js 15, Tailwind CSS, TypeScript |
-| Backend | FastAPI, Python 3.9 |
-| Database | PostgreSQL 15, PostGIS |
-| Pipeline | pandas, BeautifulSoup4, httpx |
+| Frontend | Next.js 15+, Tailwind CSS, TypeScript |
+| Backend | FastAPI, Python 3.11 (prod) |
+| Database | Neon PostgreSQL 15 |
+| Pipeline | BeautifulSoup4, httpx / requests, SQLAlchemy |
 | Auth | Clerk |
 | Billing | Stripe |
-| Monitoring | Sentry, PostHog |
-| Hosting | Vercel + Railway |
+| Monitoring | Sentry (+ PostHog planned) |
+| Hosting | Vercel (web) + Railway (api) + Neon (db) |
 
 ## Project Status
 
-**Current Phase: Phase 1 — Free Discovery Dashboard**
+**Current focus: Phase 2 — Pro Dashboard** (Sprint 7 coded; activate billing, then Sprint 8).  
+**Phase 1 engineering: complete** — free discovery dashboard is live in beta.
 
-- [ ] CoE historical scraper (1999–present)
-- [ ] PostgreSQL schema (farms, lots, auctions, certifications)
-- [ ] Farm Explorer UI
-- [ ] Auction History Browser
-- [ ] Origin Intelligence Cards
-- [ ] SEO-optimized static pages
-- [ ] Sentry ETL pipeline alerting
+| Phase | Status | Gate |
+|-------|--------|------|
+| Phase 1 — Free Discovery | Code ✓ — live beta | 500 free signups |
+| Phase 2 — Pro Dashboard | In progress | 10 Pro subscribers |
+| Phase 3 — API Access | Not started | 3 API customers |
 
-See [CLAUDE.md](CLAUDE.md) for full development context and architecture details.
+**Shipped (high level):** CoE + Cafe Imports data, Farm Explorer (Origins nav + structured table), Auctions, Origins, SEO/SSG, Sentry, Clerk/Stripe code paths.
+
+**Still to do:** signup gate, Stripe/Clerk activation, Pro alerts/price intel, entity resolution, BoP/Kenya scrapers, paid API product.
+
+Full milestone lists: **[docs/status.md](docs/status.md)** · sprint checklists in [`tasks/`](tasks/).
+
+See [CLAUDE.md](CLAUDE.md) for development context.
 
 ---
 
-*Built by Ed Monterrubio | v1.0 | June 2026*
+*Built by Ed Monterrubio | Beta | September 2026*
