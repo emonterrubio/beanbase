@@ -94,10 +94,13 @@ Canonical overview: [docs/status.md](../docs/status.md)
 - [x] Farm detail page shows lot-title breakdown when present
 - [x] Country banners + slug-derived country when `origin_id` missing
 
-### Phase 1 — Remaining (non-blocking polish / moat)
+### Phase 1 — Remaining (critical path + polish)
 
-- [ ] Validation gate: **500 free signups** tracked and met
-- [ ] PostHog (or equivalent) product analytics live on key funnels
+#### Critical path (Gate 3)
+- [ ] **500 free signups** via organic channels (r/coffee, Home Barista, Product Hunt)
+- [ ] Signup tracking (Clerk dashboard and/or PostHog) on key funnels
+
+#### Non-blocking polish / moat (after or parallel to acquisition)
 - [ ] Fix remaining CoE non-standard historical page layouts (see Sprint 2 gap)
 - [ ] Entity resolution across CoE ↔ Cafe Imports canonical farms (moat)
 - [ ] Enrichers: flavor tags, altitude bands, score/price indices

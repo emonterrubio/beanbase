@@ -2,6 +2,7 @@
 
 Validation gate: **3 API paying customers** before unlocking Enterprise tier.  
 Unlock condition: 10 Pro Dashboard subscribers achieved (Phase 2 gate).  
+**Planning note:** Critical path to first dollar prioritizes free signups + Pro (alerts/Shopify/Stripe) **before** this phase. Start Phase 3 in earnest after first paying customers / early MRR unless a design partner needs API keys sooner.  
 Canonical overview: [docs/status.md](../docs/status.md)
 
 **Status:** Not started. Note: read-only public endpoints (`/farms`, `/lots`, `/origins`) already exist for the dashboard; Phase 3 adds **keys, metering, and paid API product surfaces**.

@@ -191,20 +191,30 @@ APIFY_API_TOKEN=           # Optional, for scraping proxy
 
 ## Current Phase
 
-See **[docs/status.md](docs/status.md)** for the full done-vs-remaining roadmap.
+See **[docs/status.md](docs/status.md)** for the full roadmap, including the **critical path to first dollar**.
 
-**Focus: Phase 2 — Pro Dashboard** (Sprint 7 code complete; activate Clerk/Stripe, then Sprint 8).  
-**Phase 1 engineering: complete** — free discovery beta is live.
+### Critical path to first dollar (planning priority)
+
+| Gate | Status |
+|------|--------|
+| Data foundation | Done |
+| Free dashboard live + SEO | Done |
+| First 500 free signups | **Next** (r/coffee, Home Barista, Product Hunt) |
+| Pro tier launch (alerts + Shopify gen + Stripe active) | Partial — activate billing; build alerts + Shopify |
+| First paying customer ($29/mo) | Not started |
+| $1K MRR | Not started |
+
+Defer Phase 3 (paid API) until this path is moving unless a design partner needs keys sooner.
+
+### Engineering phases
 
 | Phase | Status | Gate |
 |-------|--------|------|
 | Phase 1 — Free Discovery Dashboard | Code ✓ | 500 free signups |
 | Phase 2 — Pro Dashboard | In progress | 10 Pro subscribers |
-| Phase 3 — API Access | Not started | 3 API customers |
+| Phase 3 — API Access | Defer until first $ | 3 API customers |
 
 Sprint checklists: [`tasks/todo.md`](tasks/todo.md)
-
-Validation gate before treating Phase 2 as commercially unlocked: **500 free signups**
 
 ## Architecture Principles
 
