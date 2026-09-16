@@ -1,6 +1,8 @@
 # Phase 1 — Free Discovery Dashboard (Months 1–3)
 
-Validation gate: **500 free signups** before starting Phase 2.
+Validation gate: **500 free signups** before treating Phase 2 as commercially unlocked.  
+Engineering status: **code complete** (Sprints 0–6 + post-launch polish).  
+Canonical overview: [docs/status.md](../docs/status.md)
 
 ---
 
@@ -65,9 +67,9 @@ Validation gate: **500 free signups** before starting Phase 2.
 
 ### Sprint 5: Next.js Frontend ✓
 - [x] web/src/styles/tokens.css — Tailwind v4 @theme design tokens (bean-brown, honey, cream, fog palettes + semantic aliases)
-- [x] web/src/lib/api.ts — typed fetch wrapper (FarmSummary, FarmDetail, LotRow, LotDetail, OriginCard, Page<T>) pointing at NEXT_PUBLIC_API_URL
+- [x] web/src/lib/api.ts — typed fetch wrapper (FarmSummary, FarmDetail, LotRow, LotDetail, OriginCard, Page[T]) pointing at NEXT_PUBLIC_API_URL
 - [x] Layout: Nav.tsx (sticky header, brand logo, CTA) + Footer.tsx
-- [x] Pages: /farms (Farm Explorer, SearchBar + origin/process FilterChips, paginated), /farms/[slug] (farm detail + lot history)
+- [x] Pages: /farms (Farm Explorer, search + filters, paginated), /farms/[slug] (farm detail + lot history)
 - [x] Pages: /auctions (origin/score/year FilterChips + LotTable, paginated), /origins (country grid), /origins/[country] (altitude/harvest/varietals + top lots)
 - [x] Pages: / (home hero, live stats with try/catch fallback, feature cards)
 - [x] Components: FarmCard, FarmGrid, LotTable, OriginCard, ScoreBadge, CertBadge, SearchBar, FilterChip, Pagination
@@ -75,10 +77,32 @@ Validation gate: **500 free signups** before starting Phase 2.
 - [x] Deployed to Vercel — beanbase-theta.vercel.app live (Root Directory=web, web/vercel.json)
 
 ### Sprint 6: SEO + Sentry ✓
-- [x] generateStaticParams on /farms/[slug] (500 pages) and /origins/[country] (18 pages) — SSG at build time
+- [x] generateStaticParams on /farms/[slug] and /origins/[country] — SSG at build time
 - [x] generateMetadata — OG title + description on farm and origin detail pages
 - [x] web/src/app/sitemap.ts — dynamic sitemap covering static routes + all farm + origin pages
 - [x] @sentry/nextjs wired via src/instrumentation.ts + sentry.{client,server}.config.ts + withSentryConfig in next.config.ts
 - [x] sentry-sdk wired into api/app/main.py (FastApiIntegration + StarletteIntegration, gated on SENTRY_DSN)
 - [x] ETL pipeline Sentry alerting — sentry_sdk.init in run_monthly.py; capture_exception on all scraper + loader failures
 - [x] Beta launch — SENTRY_DSN set in Vercel + Railway; beanbase-theta.vercel.app live and open for signups
+
+### Sprint 6.5: Farm Explorer polish & lot-title data quality ✓
+- [x] Alembic `0003` — municipality, department, lot_varietal, lot_process, packaging_type, source_lot_title on farms
+- [x] `pipeline/src/normalizers/farm_name.py` — parse importer titles into farm + owner + geo + varietal + process + packaging
+- [x] Cafe Imports / CoE loaders persist owner + region/department; backfill script applied on Neon
+- [x] Farm Explorer: Origins vertical nav (replaced multi-filter sidebar)
+- [x] Farm table columns: Producer/Micro-Region, Farm, Source, Municipality, Department, Varietal, Process, Packaging
+- [x] Farm detail page shows lot-title breakdown when present
+- [x] Country banners + slug-derived country when `origin_id` missing
+
+### Phase 1 — Remaining (critical path + polish)
+
+#### Critical path (Gate 3)
+- [ ] **500 free signups** via organic channels (r/coffee, Home Barista, Product Hunt)
+- [ ] Signup tracking (Clerk dashboard and/or PostHog) on key funnels
+
+#### Non-blocking polish / moat (after or parallel to acquisition)
+- [ ] Fix remaining CoE non-standard historical page layouts (see Sprint 2 gap)
+- [ ] Entity resolution across CoE ↔ Cafe Imports canonical farms (moat)
+- [ ] Enrichers: flavor tags, altitude bands, score/price indices
+- [ ] Certification registry ingest (Rainforest Alliance / Fair Trade)
+- [ ] Wire PostGIS geo queries if/when farm coordinates are populated

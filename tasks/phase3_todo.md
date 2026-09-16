@@ -1,7 +1,11 @@
 # Phase 3 — API Access (Months 6–12)
 
-Validation gate: **3 API paying customers** before unlocking Enterprise tier.
-Unlock condition: 10 Pro Dashboard subscribers achieved (Phase 2 gate).
+Validation gate: **3 API paying customers** before unlocking Enterprise tier.  
+Unlock condition: 10 Pro Dashboard subscribers achieved (Phase 2 gate).  
+**Planning note:** Critical path to first dollar prioritizes free signups + Pro (alerts/Shopify/Stripe) **before** this phase. Start Phase 3 in earnest after first paying customers / early MRR unless a design partner needs API keys sooner.  
+Canonical overview: [docs/status.md](../docs/status.md)
+
+**Status:** Not started. Note: read-only public endpoints (`/farms`, `/lots`, `/origins`) already exist for the dashboard; Phase 3 adds **keys, metering, and paid API product surfaces**.
 
 ---
 
@@ -10,6 +14,7 @@ Unlock condition: 10 Pro Dashboard subscribers achieved (Phase 2 gate).
 - [ ] Rate limiting middleware — per-key request counters (Redis or Postgres)
 - [ ] Full endpoint coverage: GET /farms, /lots, /origins, /producers, /prices, /certifications
 - [ ] Pagination, filtering, and field selection on all list endpoints
+- [ ] Auth for paid routes (API keys / Clerk JWT as designed)
 
 ### Sprint 12: Billing & Metering
 - [ ] Stripe usage-based metering — count API calls per key per billing period
@@ -17,7 +22,7 @@ Unlock condition: 10 Pro Dashboard subscribers achieved (Phase 2 gate).
 - [ ] Overage alerts — email when approaching limit
 
 ### Sprint 13: Developer Experience
-- [ ] OpenAPI docs — auto-generated from FastAPI, hosted at /docs
+- [ ] OpenAPI docs — auto-generated from FastAPI, hosted at /docs (Scalar already used for internal/dev docs)
 - [ ] Developer portal — key management UI, usage dashboard, quickstart guide
 - [ ] Client SDK (Python) — thin wrapper around REST API
 - [ ] Webhook support — notify on new auction results

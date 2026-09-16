@@ -1,7 +1,14 @@
 # BeanBase — Lessons
 
 > Accumulated lessons from corrections and validated decisions.
-> Review at the start of each session.
+> Review at the start of each session (with `docs/status.md`).
+
+---
+
+## Documentation
+
+### Keep status docs in sync with shipped work
+README and CLAUDE.md "Current Phase" checklists went stale while Phase 1 was already code-complete and Phase 2 Sprint 7 was coded. Prefer updating `docs/status.md` + `tasks/phase*_todo.md` in the same PR as feature work.
 
 ---
 

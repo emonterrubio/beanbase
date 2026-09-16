@@ -1,150 +1,102 @@
 # BeanBase — Architecture
 
+> Companion status doc: [status.md](./status.md)
+
 ## System Overview
 
-BeanBase is a three-tier system: a data pipeline that collects and enriches coffee data, a REST API that serves it, and a Next.js frontend that makes it discoverable.
+BeanBase is a three-tier system: a data pipeline that collects and normalizes coffee data, a REST API that serves it, and a Next.js frontend that makes it discoverable.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                        External Sources                     │
-│  CoE | BoP | Kenya NCE | USDA FAS | ICO | Rainforest | RA   │
+│  Live: CoE | Cafe Imports | Onyx                            │
+│  Planned: BoP | Kenya NCE | USDA FAS | ICO | Cert registries│
 └──────────────────────┬──────────────────────────────────────┘
                        │ scrape / API pull
 ┌──────────────────────▼──────────────────────────────────────┐
 │                    ETL Pipeline (Python)                     │
-│   Ingest → Normalize → Entity Resolve → Enrich → Load       │
+│   Ingest → Normalize → Entity Resolve* → Enrich* → Load     │
 │                   pipeline/src/                             │
 └──────────────────────┬──────────────────────────────────────┘
                        │ writes
 ┌──────────────────────▼──────────────────────────────────────┐
-│             PostgreSQL + PostGIS (Railway)                   │
+│             PostgreSQL (Neon)                               │
 │   farms | lots | auction_events | certifications | origins  │
+│   importer_products                                         │
 └──────────────────────┬──────────────────────────────────────┘
                        │ reads
 ┌──────────────────────▼──────────────────────────────────────┐
 │                FastAPI Backend (Railway)                     │
-│   /farms | /lots | /origins | /prices | /producers          │
-│   + Auth (Clerk JWT) | Rate limiting | Stripe metering      │
+│   /farms | /farms/facets | /lots | /origins | /health       │
+│   Planned: /prices | /producers | API keys | metering       │
 └──────────────────────┬──────────────────────────────────────┘
                        │ HTTP
 ┌──────────────────────▼──────────────────────────────────────┐
 │               Next.js Frontend (Vercel)                     │
-│   Farm Explorer | Auction Browser | Origin Cards            │
+│   Farm Explorer | Auction Browser | Origin Cards | /pro     │
 │   Static pages (SSG) for SEO + Dynamic for dashboard        │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## Database Schema (Phase 1)
+\*Entity resolution and enrichers are **planned**, not yet implemented as pipeline modules.
 
-### Core Tables
+## Hosting (as deployed)
 
-```sql
--- Country/region taxonomy
-CREATE TABLE origins (
-  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  country     TEXT NOT NULL,
-  region      TEXT,
-  latitude    FLOAT,
-  longitude   FLOAT,
-  geo         GEOGRAPHY(POINT, 4326),
-  altitude_min_m  INT,
-  altitude_max_m  INT,
-  harvest_start_month INT,
-  harvest_end_month   INT,
-  dominant_varietals  TEXT[],
-  flavor_tags         TEXT[],
-  created_at  TIMESTAMPTZ DEFAULT now(),
-  updated_at  TIMESTAMPTZ DEFAULT now()
-);
+| Component | Provider | Notes |
+|-----------|----------|--------|
+| Web | Vercel | Root Directory = `web` |
+| API | Railway | Root Directory = `api`; healthcheck `/health` |
+| Database | Neon | Pooler URL for API; direct URL preferred for Alembic/backfills |
 
--- Farm entity graph (canonical records across sources)
-CREATE TABLE farms (
-  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  canonical_name  TEXT NOT NULL,
-  origin_id       UUID REFERENCES origins(id),
-  altitude_m      INT,
-  varietal        TEXT[],
-  process_methods TEXT[],
-  owner_name      TEXT,
-  cooperative_name TEXT,
-  geo             GEOGRAPHY(POINT, 4326),
-  flavor_tags     TEXT[],
-  coe_producer_id TEXT,    -- cross-reference key
-  importer_ids    JSONB,   -- {royal_coffee: "...", cafe_imports: "..."}
-  created_at      TIMESTAMPTZ DEFAULT now(),
-  updated_at      TIMESTAMPTZ DEFAULT now()
-);
+## Database Schema (implemented)
 
--- Auction events (CoE, BoP, Kenya NCE)
-CREATE TABLE auction_events (
-  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  source      TEXT NOT NULL,   -- 'cup_of_excellence' | 'best_of_panama' | 'kenya_nce'
-  country     TEXT NOT NULL,
-  year        INT NOT NULL,
-  event_name  TEXT,
-  event_date  DATE,
-  created_at  TIMESTAMPTZ DEFAULT now()
-);
+ORM models use integer primary keys (see Alembic `0001`–`0003`). Conceptual fields:
 
--- Individual auction lots
-CREATE TABLE lots (
-  id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  auction_event_id UUID REFERENCES auction_events(id),
-  farm_id          UUID REFERENCES farms(id),
-  lot_number       INT,
-  score            NUMERIC(4,2),
-  process_method   TEXT,
-  varietal         TEXT[],
-  weight_kg        NUMERIC(8,2),
-  winning_price_usd_per_kg NUMERIC(8,2),
-  buyer_name       TEXT,
-  flavor_tags      TEXT[],
-  tasting_notes    TEXT,
-  raw_source_data  JSONB,    -- original scraped record
-  created_at       TIMESTAMPTZ DEFAULT now()
-);
+### Core tables
 
--- Certification cross-map
-CREATE TABLE certifications (
-  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  farm_id     UUID REFERENCES farms(id),
-  body        TEXT NOT NULL,  -- 'rainforest_alliance' | 'fair_trade' | 'organic' | 'utz' | 'bird_friendly'
-  cert_number TEXT,
-  valid_from  DATE,
-  valid_until DATE,
-  created_at  TIMESTAMPTZ DEFAULT now()
-);
-```
+- **origins** — country/region taxonomy (seeded ~30 countries)
+- **farms** — canonical farm records; includes `owner_name`, `process_methods`, `varietals`, `importer_ids`, `source`, and lot-title fields from migration `0003`:
+  - `municipality`, `department`, `lot_varietal`, `lot_process`, `packaging_type`, `source_lot_title`
+- **auction_events** — CoE (and future BoP / Kenya NCE) events
+- **lots** — auction lots with `lot_rank`, score, price, process, varietal, `raw_source_data`
+- **certifications** — table exists; registry ingest not yet populated at scale
+- **importer_products** — Onyx (and similar) product rows (`0002`)
+
+Exact DDL: `api/alembic/versions/`.
 
 ## Enrichment Pipeline Stages
 
-| Stage | Input | Output |
-|-------|-------|--------|
-| **Ingest** | Raw source data | Staging tables with `raw_source_data` JSONB |
-| **Normalize** | Staging rows | Standardized fields (process methods, region names, varietal taxonomy) |
-| **Entity Resolution** | Normalized records from multiple sources | Merged canonical `farms` records with `importer_ids` cross-references |
-| **Enrich** | Canonical records | Computed fields: `flavor_tags`, altitude bands, score/price indices, longitudinal stats |
-| **Serve** | Clean DB records | REST API + Next.js data layer |
+| Stage | Status | Notes |
+|-------|--------|--------|
+| **Ingest** | Done (partial) | CoE archives, Cafe Imports, Onyx |
+| **Normalize** | Done (partial) | Process taxonomy; importer lot-title parser |
+| **Entity Resolution** | Not started | Cross-source farm joins are the long-term moat |
+| **Enrich** | Not started | Flavor tags, indices, longitudinal stats |
+| **Serve** | Done | FastAPI + Next.js |
 
 ## Entity Resolution Strategy
 
-The entity resolution problem: the same farm appears in CoE results as "Finca La Esperanza," in Royal Coffee's catalog as "La Esperanza Estate," and in the Rainforest Alliance registry as "Finca Esperanza S.A."
+The entity resolution problem: the same farm appears in CoE results as "Finca La Esperanza," in an importer catalog as "La Esperanza Estate," and in a cert registry as "Finca Esperanza S.A."
 
-**Phase 1 approach** (simple): fuzzy name matching + country + region. Flag low-confidence matches for manual review.
+**Current (Phase 1):** separate records per source slug; Cafe Imports titles parsed into display fields; CoE uses `FarmName` / `ProducerName`. No cross-source merge yet.
 
-**Phase 2 approach** (improved): add GPS coordinates (from Wikidata + OpenStreetMap) as a deduplication signal. Farms within 0.5km with similar names = same canonical record.
+**Next:** fuzzy name + country/region matching with low-confidence review queue.
+
+**Later:** GPS (Wikidata / OSM) as a dedup signal (farms within ~0.5 km + similar names).
 
 ## SEO Strategy
 
-Farm and lot detail pages must be statically generated at build time:
-- `/farms/[slug]` → `generateStaticParams()` for all farms in DB
-- `/lots/[id]` → `generateStaticParams()` for all lots
+Farm and origin detail pages are statically generated:
+
+- `/farms/[slug]` → `generateStaticParams()`
 - `/origins/[country]` → country-level origin pages
+- `sitemap.ts` covers static + farm + origin routes
 
 Target search queries:
+
 - `"Cup of Excellence Ethiopia 2023 results"`
 - `"Yirgacheffe farm profiles"`
-- `"Best of Panama 2022 lot scores"`
+- `"Best of Panama 2022 lot scores"` (once BoP data exists)
 
 ## Decisions
 
