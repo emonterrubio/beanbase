@@ -150,20 +150,25 @@ Interactive docs: Scalar UI at `/docs` when the API server is running.
 
 ## Project Status
 
-**Current focus: Phase 2 — Pro Dashboard** (Sprint 7 coded; activate billing, then Sprint 8).  
-**Phase 1 engineering: complete** — free discovery dashboard is live in beta.
+**Critical path:** Gates 1–2 done → next **500 free signups**, then **Pro launch** (alerts + Shopify + Stripe) → first $29 customer → $1K MRR.  
+**Engineering:** Phase 1 complete · Phase 2 in progress · Phase 3 deferred until first-dollar path moves.
 
-| Phase | Status | Gate |
-|-------|--------|------|
+| Critical-path gate | Status |
+|--------------------|--------|
+| Data foundation (CoE + schema) | Done |
+| Free dashboard live + SEO | Done |
+| First 500 free signups | **Next** |
+| Pro tier (alerts + Shopify + Stripe) | Partial — code ready; activate + build alerts/Shopify |
+| First paying customer | Not started |
+| $1K MRR | Not started |
+
+| Engineering phase | Status | Gate |
+|-------------------|--------|------|
 | Phase 1 — Free Discovery | Code ✓ — live beta | 500 free signups |
 | Phase 2 — Pro Dashboard | In progress | 10 Pro subscribers |
-| Phase 3 — API Access | Not started | 3 API customers |
+| Phase 3 — API Access | Defer until first $ | 3 API customers |
 
-**Shipped (high level):** CoE + Cafe Imports data, Farm Explorer (Origins nav + structured table), Auctions, Origins, SEO/SSG, Sentry, Clerk/Stripe code paths.
-
-**Still to do:** signup gate, Stripe/Clerk activation, Pro alerts/price intel, entity resolution, BoP/Kenya scrapers, paid API product.
-
-Full milestone lists: **[docs/status.md](docs/status.md)** · sprint checklists in [`tasks/`](tasks/).
+Full detail: **[docs/status.md](docs/status.md)** · sprint checklists in [`tasks/`](tasks/).
 
 See [CLAUDE.md](CLAUDE.md) for development context.
 

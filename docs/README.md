@@ -2,7 +2,7 @@
 
 | Document | Purpose |
 |----------|---------|
-| [status.md](./status.md) | **Project status & roadmap** — done vs remaining by phase |
+| [status.md](./status.md) | **Project status & roadmap** — critical path to first dollar + engineering phases |
 | [architecture.md](./architecture.md) | System design, schema notes, enrichment stages |
 | [decisions/](./decisions/) | Architecture Decision Records (ADRs) |
 | [runbooks/](./runbooks/) | Operational runbooks |
